@@ -1,0 +1,88 @@
+# AGENTS.md
+
+이 문서는 Repository에서 항상 지킬 실행 규칙이다.
+Notion Development Convention 전체를 복제하지 않고, 이 프로젝트에 필요한 것만 간결하게 담는다.
+
+## 1. 프로젝트 목적과 범위
+
+- Mac/Windows 크로스 플랫폼 메모·할일 앱
+- 터미널 감성의 심플한 UI, 계정 기반 기기 간 실시간 동기화
+- MVP 범위:
+  - 메모/할일 통합 아이템 (체크박스 옵션)
+  - 마크다운 편집 (CodeMirror)
+  - 로그인 (Supabase Auth)
+  - 실시간 동기화 (Supabase Realtime)
+  - 검색, 정렬
+  - 메뉴바(macOS)/트레이(Windows) 퀵 액세스 (Electron Tray API)
+- MVP 제외 (Future): 태그/카테고리, 첨부파일, 오프라인 캐시, 알림
+
+## 2. 기술 스택 & Architecture 경계
+
+- Desktop Shell: Electron
+- Frontend: React + TypeScript + Vite + TailwindCSS
+- Editor: CodeMirror (마크다운 문법 하이라이팅)
+- Backend/DB: Supabase (Postgres + Auth + Realtime)
+  - 커스텀 REST API 서버를 만들지 않는다. Supabase JS client SDK로만 데이터에 접근한다.
+  - 인가는 Row Level Security(RLS)로 처리한다. 클라이언트 코드에 권한 로직을 중복 구현하지 않는다.
+
+## 3. 디렉터리 책임
+
+```
+src/
+├── main/            # Electron main process (창 생성, IPC, auto-update)
+│   └── tray.ts      # 메뉴바/트레이 아이콘, 퀵 액세스 팝업 창
+├── preload/         # contextBridge로 노출할 API만 최소한으로 정의
+├── renderer/        # React 앱
+│   ├── components/  # 재사용 UI 컴포넌트
+│   ├── features/    # 기능 단위 (items, auth 등) — 화면/훅/타입을 함께 둔다
+│   ├── lib/         # Supabase client 초기화, 공용 유틸
+│   └── styles/       # 터미널 테마 (다크, 모노스페이스)
+└── shared/          # main ↔ renderer 공유 타입
+```
+
+- 빈 하위 폴더를 미리 만들지 않는다.
+- `lib`을 잡동사니 보관소로 쓰지 않는다. 두 기능에서 실제 공유할 때만 이동한다.
+
+## 4. Naming (TypeScript/React)
+
+- Component: PascalCase (`ItemList.tsx`)
+- Hook: camelCase, `use` 접두사 (`useItems.ts`)
+- 변수/함수: camelCase, 상수: UPPER_SNAKE_CASE
+- 타입/인터페이스: PascalCase, `I` 접두사 사용하지 않음
+- Boolean은 긍정형으로: `isCompleted`, `hasSynced`
+- 파일명은 컴포넌트/훅 이름과 동일하게 맞춘다
+
+## 5. Formatter / Lint / Test / Build
+
+> 프로젝트 스캐폴딩 후 실제 명령으로 채운다.
+
+- Format: `npm run format` (Prettier)
+- Lint: `npm run lint` (ESLint)
+- Test: `npm run test` (Vitest)
+- Build: `npm run build` (electron-builder → .dmg / .exe)
+
+CI는 위 네 가지를 PR과 main push에서 실행한다.
+
+## 6. Git / PR 규칙
+
+Notion Development Convention의 Git/GitHub Convention을 그대로 따른다.
+
+- Commit: `<type>: <한국어 subject>` (예: `feat: 메모 실시간 동기화 구현`)
+- Branch: `<type>/<issue-number>-<영문 설명>` (예: `feat/12-realtime-sync`)
+- PR 제목: `<type>: <한국어 subject>`, 본문에 `Closes #번호`
+- Merge: Squash Merge만 사용. main 직접 Push·Force Push 금지, PR + CI 필수.
+- 1 Issue = 1 Branch = 1 PR (Orca에서는 1 Worktree도 동일하게 매핑)
+
+## 7. Secret & 고위험 변경 제한
+
+- Supabase URL / anon key는 `.env`에 두고 Git에 포함하지 않는다. `.env.example`만 커밋한다.
+- Supabase service role key는 클라이언트(Electron renderer/main)에 절대 포함하지 않는다.
+- 다음은 Plan 승인 후에만 구현한다 (Orca High-Risk 기준):
+  - DB 스키마 변경, RLS 정책 변경
+  - 인증/로그인 로직 변경
+  - 새로운 Dependency 또는 외부 서비스 도입
+- Secret을 조회·출력·Commit하지 않는다.
+
+## 8. Claude Code
+
+Claude Code에만 필요한 규칙이 생기면 여기에 추가한다. (현재 없음)
