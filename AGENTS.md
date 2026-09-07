@@ -54,14 +54,14 @@ src/
 
 ## 5. Formatter / Lint / Test / Build
 
-> 프로젝트 스캐폴딩 후 실제 명령으로 채운다.
-
+- Dev: `npm run dev` (electron-vite)
 - Format: `npm run format` (Prettier)
 - Lint: `npm run lint` (ESLint)
-- Test: `npm run test` (Vitest)
-- Build: `npm run build` (electron-builder → .dmg / .exe)
+- Typecheck: `npm run typecheck` (main/preload + renderer 분리)
+- Test: 아직 없음. 첫 테스트를 쓸 때 Vitest를 붙인다.
+- Build: `npm run build` → `npm run build:mac` / `build:win` (electron-builder → .dmg / .exe)
 
-CI는 위 네 가지를 PR과 main push에서 실행한다.
+CI는 format·lint·typecheck·build를 PR과 main push에서 실행한다.
 
 ## 6. Git / PR 규칙
 
