@@ -1,0 +1,30 @@
+-- SyncPad items 스키마. Supabase SQL Editor에 붙여넣어 실행한다.
+-- 인가는 전부 RLS로 처리한다 (AGENTS.md §2).
+
+create table public.items (
+  id           uuid primary key default gen_random_uuid(),
+  user_id      uuid not null references auth.users (id) on delete cascade,
+  content      text not null default '',
+  is_task      boolean not null default false,
+  is_completed boolean not null default false,
+  sort_order   double precision not null default 0,
+  created_at   timestamptz not null default now(),
+  updated_at   timestamptz not null default now()
+);
+
+alter table public.items enable row level security;
+
+-- select/insert/update/delete 조건이 전부 같아서 for all 정책 하나로 끝낸다.
+create policy items_owner_only on public.items
+  for all to authenticated
+  using (auth.uid() = user_id)
+  with check (auth.uid() = user_id);
+
+create index items_user_sort_idx on public.items (user_id, sort_order);
+
+-- updated_at은 DB가 관리한다. 클라이언트가 매 write마다 챙기지 않게.
+create function public.touch_updated_at() returns trigger language plpgsql as $$
+begin new.updated_at = now(); return new; end $$;
+
+create trigger items_touch_updated_at before update on public.items
+  for each row execute function public.touch_updated_at();

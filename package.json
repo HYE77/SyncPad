@@ -1,7 +1,7 @@
 {
   "name": "syncpad",
   "version": "1.0.0",
-  "description": "Mac/Windows \ud06c\ub85c\uc2a4 \ud50c\ub7ab\ud3fc \uba54\ubaa8\u00b7\ud560\uc77c \uc571",
+  "description": "Mac/Windows 크로스 플랫폼 메모·할일 앱",
   "main": "./out/main/index.js",
   "author": "HYE77",
   "homepage": "https://github.com/HYE77/SyncPad",
@@ -22,7 +22,8 @@
   },
   "dependencies": {
     "@electron-toolkit/preload": "^3.0.2",
-    "@electron-toolkit/utils": "^4.0.0"
+    "@electron-toolkit/utils": "^4.0.0",
+    "@supabase/supabase-js": "^2.115.0"
   },
   "devDependencies": {
     "@electron-toolkit/eslint-config-prettier": "^3.0.0",
