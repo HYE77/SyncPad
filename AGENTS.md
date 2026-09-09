@@ -72,6 +72,11 @@ Notion Development Convention의 Git/GitHub Convention을 그대로 따른다.
 - PR 제목: `<type>: <한국어 subject>`, 본문에 `Closes #번호`
 - Merge: Squash Merge만 사용. main 직접 Push·Force Push 금지, PR + CI 필수.
 - 1 Issue = 1 Branch = 1 PR (Orca에서는 1 Worktree도 동일하게 매핑)
+- PR 리뷰는 작업 위험도에 따라 차등 적용한다:
+  - Lite: 가볍게 훑어보고 바로 머지
+  - Standard: 전체 diff를 한 번 읽고, 걸리는 부분은 코멘트로 남긴 뒤 머지
+  - High-Risk: diff를 정독하고, 무엇을 확인했는지를 PR 코멘트로 남긴 뒤 머지
+  - 이 리뷰는 자동으로 실행되지 않는다. 사람이 직접 하거나, Orca에서 별도 Agent에게 리뷰를 명시적으로 요청해야 한다.
 
 ## 7. Secret & 고위험 변경 제한
 
