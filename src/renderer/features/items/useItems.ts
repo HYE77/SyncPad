@@ -19,11 +19,14 @@ async function ensureSession(): Promise<void> {
   }
 }
 
+type ItemFlags = Partial<Pick<Item, 'is_task' | 'is_completed'>>
+
 type UseItems = {
   items: Item[]
   error: string | null
   create: () => Promise<Item | null>
   update: (id: string, content: string) => void
+  setFlags: (id: string, flags: ItemFlags) => Promise<void>
   remove: (id: string) => Promise<void>
   flush: () => void
 }
@@ -99,6 +102,13 @@ export function useItems(): UseItems {
     [save]
   )
 
+  // 체크박스는 디바운스하지 않는다. 클릭은 타이핑처럼 연달아 오지 않는다.
+  const setFlags = useCallback(async (id: string, flags: ItemFlags): Promise<void> => {
+    setItems((prev) => prev.map((item) => (item.id === id ? { ...item, ...flags } : item)))
+    const { error } = await supabase.from('items').update(flags).eq('id', id)
+    if (error) setError(error.message)
+  }, [])
+
   const remove = useCallback(async (id: string): Promise<void> => {
     delete pending.current[id]
     clearTimeout(timers.current[id])
@@ -107,5 +117,5 @@ export function useItems(): UseItems {
     if (error) setError(error.message)
   }, [])
 
-  return { items, error, create, update, remove, flush }
+  return { items, error, create, update, setFlags, remove, flush }
 }
