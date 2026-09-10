@@ -90,4 +90,9 @@ Notion Development Convention의 Git/GitHub Convention을 그대로 따른다.
 
 ## 8. Claude Code
 
-Claude Code에만 필요한 규칙이 생기면 여기에 추가한다. (현재 없음)
+- PR 리뷰 봇: `@claude` 멘션으로만 발동한다 (`.github/workflows/claude.yml`).
+  - PR 코멘트에 `@claude`를 달면 리뷰가 코멘트로 달린다. 멘션 없이는 아무것도 실행되지 않는다.
+  - 리포 소유자의 코멘트만 받는다. private 리포라 Actions 분이 과금되므로 자동 트리거는 도입하지 않는다.
+  - 봇은 6번의 위험도 등급을 스스로 판정해 첫 줄에 표시한다. 사람이 그 판정을 검증한다.
+  - 포맷·린트·타입·빌드는 CI가 잡으므로 봇은 언급하지 않는다.
+  - 봇 리뷰는 6번의 사람 리뷰를 대체하지 않는다. 머지 판단은 사람이 한다.
