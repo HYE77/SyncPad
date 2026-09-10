@@ -25,7 +25,9 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v5
         with:
-          fetch-depth: 1
+          # shallow면 base와의 merge base가 없어서 git diff origin/main...HEAD가
+          # 조용히 빈 결과를 낸다. 봇이 리뷰할 diff를 못 본다 (fetch-depth.ts).
+          fetch-depth: 0
 
       - name: Run Claude Code
         id: claude
