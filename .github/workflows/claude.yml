@@ -32,6 +32,10 @@ jobs:
         uses: anthropics/claude-code-action@v1
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          # prompt를 주면 comment 이벤트가 agent 모드로 빠지는데, agent 모드는
+          # 트래킹 코멘트를 만들지 않아 리뷰를 써 넣을 곳이 없다 (detector.ts).
+          # tag 모드로 되돌린다. prompt는 <custom_instructions>로 그대로 살아남는다.
+          track_progress: true
           additional_permissions: |
             actions: read
           prompt: |
