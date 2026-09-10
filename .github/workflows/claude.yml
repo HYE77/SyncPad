@@ -5,25 +5,22 @@ on:
     types: [created]
   pull_request_review_comment:
     types: [created]
-  issues:
-    types: [opened, assigned]
-  pull_request_review:
-    types: [submitted]
 
 jobs:
   claude:
+    # 멘션 방식만 사용한다 (AGENTS.md 6번: 리뷰는 자동 실행하지 않는다).
+    # 리포 소유자의 코멘트만 받는다 (Actions 분 과금 가드).
     if: |
-      (github.event_name == 'issue_comment' && contains(github.event.comment.body, '@claude')) ||
-      (github.event_name == 'pull_request_review_comment' && contains(github.event.comment.body, '@claude')) ||
-      (github.event_name == 'pull_request_review' && contains(github.event.review.body, '@claude')) ||
-      (github.event_name == 'issues' && (contains(github.event.issue.body, '@claude') || contains(github.event.issue.title, '@claude')))
+      contains(github.event.comment.body, '@claude') &&
+      github.event.comment.user.login == github.repository_owner &&
+      (github.event_name == 'pull_request_review_comment' || github.event.issue.pull_request)
     runs-on: ubuntu-latest
     permissions:
       contents: read
       pull-requests: read
       issues: read
       id-token: write
-      actions: read # Required for Claude to read CI results on PRs
+      actions: read # CI 결과 조회용
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -35,15 +32,27 @@ jobs:
         uses: anthropics/claude-code-action@v1
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
-
-          # This is an optional setting that allows Claude to read CI results on PRs
           additional_permissions: |
             actions: read
+          prompt: |
+            이 PR을 리뷰한다. 코멘트 본문에 리뷰 외의 구체적 지시가 있으면 그 지시를 우선한다.
 
-          # Optional: Give a custom prompt to Claude. If this is not specified, Claude will perform the instructions specified in the comment that tagged it.
-          # prompt: 'Update the pull request description to include a summary of changes.'
+            1. 먼저 리포의 AGENTS.md를 읽고, 그 규칙을 기준으로 리뷰한다.
 
-          # Optional: Add claude_args to customize behavior and configuration
-          # See https://github.com/anthropics/claude-code-action/blob/main/docs/usage.md
-          # or https://code.claude.com/docs/en/cli-reference for available options
-          # claude_args: '--allowed-tools Bash(gh pr *)'
+            2. diff의 위험도를 판정하고 그에 맞는 깊이로만 리뷰한다 (AGENTS.md 6번, 판정 기준은 7번):
+               - High-Risk: DB 스키마·RLS 변경(supabase/**), 인증/로그인 로직, 신규 Dependency(package.json)
+                 또는 외부 서비스 도입 → 정독하고, 무엇을 확인했는지 항목별로 남긴다.
+               - Standard: 그 외 실코드 변경 → 전체 diff를 읽고 걸리는 부분만 지적한다.
+               - Lite: 문서·주석·설정 오탈자 수준 → 이상 없으면 한 줄로 끝낸다.
+               첫 줄에 `위험도: High-Risk|Standard|Lite`를 명시한다.
+
+            3. 포맷·린트·타입·빌드 오류는 언급하지 않는다. CI 워크플로의 몫이다.
+
+            4. 중점 확인 항목:
+               - Supabase service role key가 renderer/main 코드에 들어갔는가 (7번)
+               - 커스텀 REST API 서버를 만들었는가 (2번 — 금지)
+               - RLS로 처리할 인가를 클라이언트에 중복 구현했는가 (2번)
+               - .env 값이나 Supabase URL/키가 diff에 섞였는가 (7번)
+               - High-Risk 변경인데 Plan 승인 없이 진행된 흔적이 있는가 (7번)
+
+            지적할 것이 없으면 짧게 끝낸다. 코드는 수정하지 말고 리뷰 코멘트만 남긴다.
