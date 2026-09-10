@@ -17,13 +17,13 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      pull-requests: read
-      issues: read
+      pull-requests: write # 인라인 리뷰 코멘트 작성
+      issues: write # PR 본문 코멘트 작성 (issue_comment API를 탄다)
       id-token: write
       actions: read # CI 결과 조회용
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 1
 
