@@ -10,7 +10,11 @@ function firstLine(content: string): string {
 export function Items(): React.JSX.Element {
   const { items, error, create, update, setFlags, remove, flush } = useItems()
   const [selectedId, setSelectedId] = useState<string | null>(null)
+  const [query, setQuery] = useState('')
+  // 선택은 목록 필터와 무관하게 유지한다. 검색 중에 편집하던 메모가 닫히면 곤란하다.
   const selected = items.find((item) => item.id === selectedId) ?? null
+  const q = query.trim().toLowerCase()
+  const visible = q ? items.filter((item) => item.content.toLowerCase().includes(q)) : items
 
   return (
     <main className="flex h-screen">
@@ -24,8 +28,16 @@ export function Items(): React.JSX.Element {
         >
           + 새 메모
         </button>
+        <input
+          type="search"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="검색"
+          aria-label="메모 검색"
+          className="border-b border-term-dim/30 bg-transparent px-3 py-2 text-sm outline-none placeholder:text-term-dim"
+        />
         <ul className="flex-1 overflow-y-auto">
-          {items.map((item) => (
+          {visible.map((item) => (
             <li
               key={item.id}
               className={`flex items-center gap-2 pl-3 hover:bg-white/5 ${
