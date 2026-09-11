@@ -10,15 +10,6 @@ export type Item = {
   updated_at: string
 }
 
-// ponytail: #5 로그인 전까지 익명 세션으로 RLS(to authenticated)를 통과시킨다. #5 붙으면 지운다.
-async function ensureSession(): Promise<void> {
-  const { data } = await supabase.auth.getSession()
-  if (!data.session) {
-    const { error } = await supabase.auth.signInAnonymously()
-    if (error) throw error
-  }
-}
-
 type ItemFlags = Partial<Pick<Item, 'is_task' | 'is_completed'>>
 
 type UseItems = {
@@ -42,7 +33,6 @@ export function useItems(): UseItems {
   useEffect(() => {
     void (async () => {
       try {
-        await ensureSession()
         const { data, error } = await supabase
           .from('items')
           .select('*')

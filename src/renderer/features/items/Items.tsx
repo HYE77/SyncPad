@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { supabase } from '../../lib/supabase'
 import { useItems } from './useItems'
 
 // 스키마에 title이 없다. 목록에는 첫 줄을 제목처럼 쓴다.
@@ -51,6 +52,12 @@ export function Items(): React.JSX.Element {
             </li>
           ))}
         </ul>
+        <button
+          onClick={() => void supabase.auth.signOut()}
+          className="border-term-dim/30 text-term-dim border-t px-3 py-2 text-left text-sm hover:bg-white/5"
+        >
+          로그아웃
+        </button>
       </aside>
 
       <section className="flex min-w-0 flex-1 flex-col">
