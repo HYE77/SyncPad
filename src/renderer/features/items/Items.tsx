@@ -2,12 +2,7 @@ import { useState } from 'react'
 import ReactMarkdown from 'react-markdown'
 import { supabase } from '../../lib/supabase'
 import { MarkdownEditor } from './MarkdownEditor'
-import { sortItems, useItems, type SortKey } from './useItems'
-
-// 스키마에 title이 없다. 목록에는 첫 줄을 제목처럼 쓴다.
-function firstLine(content: string): string {
-  return content.split('\n', 1)[0].trim() || '(빈 메모)'
-}
+import { firstLine, sortItems, useItems, type SortKey } from './useItems'
 
 export function Items(): React.JSX.Element {
   const { items, error, create, update, setFlags, remove, flush } = useItems()
