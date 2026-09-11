@@ -28,3 +28,7 @@ begin new.updated_at = now(); return new; end $$;
 
 create trigger items_touch_updated_at before update on public.items
   for each row execute function public.touch_updated_at();
+
+-- Realtime이 items 변경을 흘려보내게 publication에 등록한다 (#6).
+-- 행 필터는 위 RLS 정책이 그대로 해준다.
+alter publication supabase_realtime add table public.items;

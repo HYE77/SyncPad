@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+import type { RealtimePostgresChangesPayload } from '@supabase/supabase-js'
 import { supabase } from '../../lib/supabase'
 
 export type Item = {
@@ -22,6 +23,25 @@ type UseItems = {
   flush: () => void
 }
 
+// 다른 기기에서 온 변경을 로컬 목록에 합친다. 충돌은 last-write-wins.
+export function applyChange(
+  prev: Item[],
+  payload: RealtimePostgresChangesPayload<Item>,
+  pending: Record<string, string>
+): Item[] {
+  if (payload.eventType === 'DELETE') {
+    // 기본 replica identity라 old에는 PK만 온다. 모르는 id면 filter가 no-op.
+    const removed = payload.old.id
+    return prev.filter((item) => item.id !== removed)
+  }
+  const row = payload.new
+  // 내 create()가 이미 낙관적으로 넣어둔 행이면 중복으로 쌓지 않는다.
+  if (!prev.some((item) => item.id === row.id)) return [row, ...prev]
+  // 이 기기에서 디바운스 대기 중인 입력은 원격 content로 덮지 않는다. 커서가 튄다.
+  const merged = pending[row.id] !== undefined ? { ...row, content: pending[row.id] } : row
+  return prev.map((item) => (item.id === row.id ? merged : item))
+}
+
 export function useItems(): UseItems {
   const [items, setItems] = useState<Item[]>([])
   const [error, setError] = useState<string | null>(null)
@@ -30,20 +50,29 @@ export function useItems(): UseItems {
   const pending = useRef<Record<string, string>>({})
   const timers = useRef<Record<string, ReturnType<typeof setTimeout>>>({})
 
-  useEffect(() => {
-    void (async () => {
-      try {
-        const { data, error } = await supabase
-          .from('items')
-          .select('*')
-          .order('created_at', { ascending: false })
-        if (error) throw error
-        setItems(data)
-      } catch (e) {
-        setError((e as Error).message)
-      }
-    })()
+  const load = useCallback(async (): Promise<void> => {
+    const { data, error } = await supabase
+      .from('items')
+      .select('*')
+      .order('created_at', { ascending: false })
+    if (error) setError(error.message)
+    else setItems(data)
   }, [])
+
+  // 남의 행은 RLS가 막아주므로 필터를 걸지 않는다.
+  // (user_id 필터를 걸면 user_id가 없는 DELETE 페이로드가 전부 탈락한다.)
+  useEffect(() => {
+    const channel = supabase
+      .channel('items')
+      .on<Item>('postgres_changes', { event: '*', schema: 'public', table: 'items' }, (payload) =>
+        setItems((prev) => applyChange(prev, payload, pending.current))
+      )
+      // 재연결 뒤에도 SUBSCRIBED가 다시 오므로, 끊긴 동안 놓친 변경은 이 refetch가 메꾼다.
+      .subscribe((status) => {
+        if (status === 'SUBSCRIBED') void load()
+      })
+    return () => void supabase.removeChannel(channel)
+  }, [load])
 
   const save = useCallback(async (id: string): Promise<void> => {
     const content = pending.current[id]
