@@ -1,5 +1,7 @@
 import { useState } from 'react'
+import ReactMarkdown from 'react-markdown'
 import { supabase } from '../../lib/supabase'
+import { MarkdownEditor } from './MarkdownEditor'
 import { sortItems, useItems, type SortKey } from './useItems'
 
 // 스키마에 title이 없다. 목록에는 첫 줄을 제목처럼 쓴다.
@@ -12,6 +14,8 @@ export function Items(): React.JSX.Element {
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [query, setQuery] = useState('')
   const [sort, setSort] = useState<SortKey>('newest')
+  // 메모를 바꿔도 유지한다. 읽기 모드로 여러 메모를 훑을 때 편하다.
+  const [isPreview, setIsPreview] = useState(false)
   // 선택은 목록 필터와 무관하게 유지한다. 검색 중에 편집하던 메모가 닫히면 곤란하다.
   const selected = items.find((item) => item.id === selectedId) ?? null
   const q = query.trim().toLowerCase()
@@ -89,16 +93,18 @@ export function Items(): React.JSX.Element {
       <section className="flex min-w-0 flex-1 flex-col">
         {selected ? (
           <>
-            <textarea
-              key={selected.id}
-              value={selected.content}
-              onChange={(e) => update(selected.id, e.target.value)}
-              onBlur={flush}
-              spellCheck={false}
-              autoFocus
-              placeholder="마크다운으로 메모를 쓰자"
-              className="flex-1 resize-none bg-transparent p-4 text-sm leading-relaxed outline-none select-text placeholder:text-term-dim"
-            />
+            {isPreview ? (
+              <div className="md-preview min-h-0 flex-1 overflow-y-auto p-4 text-sm leading-relaxed select-text">
+                <ReactMarkdown>{selected.content}</ReactMarkdown>
+              </div>
+            ) : (
+              <MarkdownEditor
+                key={selected.id}
+                value={selected.content}
+                onChange={(content) => update(selected.id, content)}
+                onBlur={flush}
+              />
+            )}
             <div className="flex items-center border-t border-term-dim/30 px-4 py-2 text-sm">
               <label className="flex items-center gap-2 text-term-dim">
                 <input
@@ -114,6 +120,17 @@ export function Items(): React.JSX.Element {
                 />
                 할일
               </label>
+              <button
+                onClick={() => {
+                  // 미리보기로 넘어가면 에디터가 사라져 onBlur가 안 온다.
+                  if (!isPreview) flush()
+                  setIsPreview(!isPreview)
+                }}
+                aria-pressed={isPreview}
+                className="ml-4 text-term-dim hover:text-term-fg"
+              >
+                {isPreview ? '편집' : '미리보기'}
+              </button>
               <button
                 onClick={() => remove(selected.id)}
                 className="ml-auto text-term-dim hover:text-red-400"
