@@ -42,6 +42,21 @@ export function applyChange(
   return prev.map((item) => (item.id === row.id ? merged : item))
 }
 
+export type SortKey = 'newest' | 'oldest' | 'completed'
+
+const newestFirst = (a: Item, b: Item): number =>
+  Date.parse(b.created_at) - Date.parse(a.created_at)
+
+// 완료여부는 미완료를 먼저 보여주고, 같은 그룹 안에서는 최신순.
+export function sortItems(items: Item[], key: SortKey): Item[] {
+  if (key === 'oldest') return [...items].sort((a, b) => newestFirst(b, a))
+  if (key === 'completed')
+    return [...items].sort(
+      (a, b) => Number(a.is_completed) - Number(b.is_completed) || newestFirst(a, b)
+    )
+  return [...items].sort(newestFirst)
+}
+
 export function useItems(): UseItems {
   const [items, setItems] = useState<Item[]>([])
   const [error, setError] = useState<string | null>(null)
