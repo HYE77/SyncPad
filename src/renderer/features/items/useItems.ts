@@ -16,7 +16,7 @@ type ItemFlags = Partial<Pick<Item, 'is_task' | 'is_completed'>>
 type UseItems = {
   items: Item[]
   error: string | null
-  create: () => Promise<Item | null>
+  create: (content?: string, isTask?: boolean) => Promise<Item | null>
   update: (id: string, content: string) => void
   setFlags: (id: string, flags: ItemFlags) => Promise<void>
   remove: (id: string) => Promise<void>
@@ -40,6 +40,11 @@ export function applyChange(
   // 이 기기에서 디바운스 대기 중인 입력은 원격 content로 덮지 않는다. 커서가 튄다.
   const merged = pending[row.id] !== undefined ? { ...row, content: pending[row.id] } : row
   return prev.map((item) => (item.id === row.id ? merged : item))
+}
+
+// 스키마에 title이 없다. 목록에는 첫 줄을 제목처럼 쓴다.
+export function firstLine(content: string): string {
+  return content.split('\n', 1)[0].trim() || '(빈 메모)'
 }
 
 export type SortKey = 'newest' | 'oldest' | 'completed'
@@ -105,7 +110,7 @@ export function useItems(): UseItems {
   // 창을 닫거나 화면을 벗어날 때 미저장 입력을 흘리지 않게.
   useEffect(() => flush, [flush])
 
-  const create = useCallback(async (): Promise<Item | null> => {
+  const create = useCallback(async (content = '', isTask = false): Promise<Item | null> => {
     const {
       data: { user }
     } = await supabase.auth.getUser()
@@ -115,7 +120,7 @@ export function useItems(): UseItems {
     }
     const { data, error } = await supabase
       .from('items')
-      .insert({ user_id: user.id, content: '' })
+      .insert({ user_id: user.id, content, is_task: isTask })
       .select()
       .single()
     if (error) {
