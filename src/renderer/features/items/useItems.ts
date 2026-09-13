@@ -82,11 +82,6 @@ export function useItems(): UseItems {
   // 남의 행은 RLS가 막아주므로 필터를 걸지 않는다.
   // (user_id 필터를 걸면 user_id가 없는 DELETE 페이로드가 전부 탈락한다.)
   useEffect(() => {
-    // 화면을 떠났다 돌아오면(설정 화면 등) removeChannel이 소켓을 닫은 직후
-    // 재구독이 겹쳐 SUBSCRIBED가 다시 오지 않는다. 첫 조회를 구독에 걸어두면
-    // 목록이 빈 채로 굳으므로, 구독과 무관하게 먼저 채운다.
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- 비동기 조회라 렌더 중 setState가 아니다
-    void load()
     const channel = supabase
       .channel('items')
       .on<Item>('postgres_changes', { event: '*', schema: 'public', table: 'items' }, (payload) =>
