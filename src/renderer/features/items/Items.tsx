@@ -4,7 +4,7 @@ import { supabase } from '../../lib/supabase'
 import { MarkdownEditor } from './MarkdownEditor'
 import { firstLine, sortItems, useItems, type SortKey } from './useItems'
 
-export function Items(): React.JSX.Element {
+export function Items({ onOpenSettings }: { onOpenSettings: () => void }): React.JSX.Element {
   const { items, error, create, update, setFlags, remove, flush } = useItems()
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [query, setQuery] = useState('')
@@ -77,6 +77,12 @@ export function Items(): React.JSX.Element {
             </li>
           ))}
         </ul>
+        <button
+          onClick={onOpenSettings}
+          className="border-term-dim/30 text-term-dim border-t px-3 py-2 text-left text-sm hover:bg-white/5"
+        >
+          설정
+        </button>
         <button
           onClick={() => void supabase.auth.signOut()}
           className="border-term-dim/30 text-term-dim border-t px-3 py-2 text-left text-sm hover:bg-white/5"
