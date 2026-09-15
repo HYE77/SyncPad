@@ -9,18 +9,18 @@ Notion Development Convention 전체를 복제하지 않고, 이 프로젝트에
 - 터미널 감성의 심플한 UI, 계정 기반 기기 간 실시간 동기화
 - MVP 범위:
   - 메모/할일 통합 아이템 (체크박스 옵션)
-  - 마크다운 편집 (CodeMirror)
+    - 경량 인라인 편집 (클릭 시 해당 줄 바로 수정)
   - 로그인 (Supabase Auth)
   - 실시간 동기화 (Supabase Realtime)
   - 검색, 정렬
   - 메뉴바(macOS)/트레이(Windows) 퀵 액세스 (Electron Tray API)
-- MVP 제외 (Future): 태그/카테고리, 첨부파일, 오프라인 캐시, 알림
+  - 카테고리 필터 (상단 탭, ALL 포함)
+- MVP 제외 (Future): 첨부파일, 오프라인 캐시, 알림
 
 ## 2. 기술 스택 & Architecture 경계
 
 - Desktop Shell: Electron
 - Frontend: React + TypeScript + Vite + TailwindCSS
-- Editor: CodeMirror (마크다운 문법 하이라이팅)
 - Backend/DB: Supabase (Postgres + Auth + Realtime)
   - 커스텀 REST API 서버를 만들지 않는다. Supabase JS client SDK로만 데이터에 접근한다.
   - 인가는 Row Level Security(RLS)로 처리한다. 클라이언트 코드에 권한 로직을 중복 구현하지 않는다.
