@@ -11,7 +11,7 @@ export type Item = {
   updated_at: string
 }
 
-type ItemFlags = Partial<Pick<Item, 'is_task' | 'is_completed'>>
+export type ItemFlags = Partial<Pick<Item, 'is_task' | 'is_completed'>>
 
 type UseItems = {
   items: Item[]
@@ -45,6 +45,13 @@ export function applyChange(
 // 스키마에 title이 없다. 목록에는 첫 줄을 제목처럼 쓴다.
 export function firstLine(content: string): string {
   return content.split('\n', 1)[0].trim() || '(빈 메모)'
+}
+
+// 마커 클릭 한 번으로 종류와 완료여부를 같이 돈다: - → [ ] → [x] → -
+export function nextFlags(item: Item): ItemFlags {
+  if (!item.is_task) return { is_task: true, is_completed: false }
+  if (!item.is_completed) return { is_completed: true }
+  return { is_task: false, is_completed: false }
 }
 
 export type SortKey = 'newest' | 'oldest' | 'completed'
