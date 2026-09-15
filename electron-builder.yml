@@ -11,6 +11,12 @@ files:
   - '!{tsconfig.json,tsconfig.node.json,tsconfig.web.json}'
 asarUnpack:
   - resources/**
+# OAuth 콜백용 커스텀 스킴. mac은 Info.plist, linux는 .desktop에 반영된다.
+# Windows는 런타임 setAsDefaultProtocolClient가 레지스트리에 쓴다.
+protocols:
+  - name: SyncPad
+    schemes:
+      - syncpad
 win:
   executableName: syncpad
 nsis:
