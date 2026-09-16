@@ -1,6 +1,6 @@
 import { expect, test, vi } from 'vitest'
 import type { RealtimePostgresChangesPayload } from '@supabase/supabase-js'
-import { applyChange, sortItems, type Item } from './useItems'
+import { applyChange, nextFlags, sortItems, type Item } from './useItems'
 
 // applyChange는 순수 함수인데 모듈이 supabase client를 끌고 온다. .env 없이 돌게 막아둔다.
 vi.mock('../../lib/supabase', () => ({ supabase: {} }))
@@ -88,4 +88,17 @@ test('정렬은 원본 배열을 건드리지 않는다', () => {
   const 원본 = [옛것, 새것]
   sortItems(원본, 'newest')
   expect(원본).toEqual([옛것, 새것])
+})
+
+test('마커는 평문 → 할일 → 완료 → 평문으로 순환한다', () => {
+  let it = item('a', '장보기')
+  const cycle = [
+    { is_task: true, is_completed: false },
+    { is_task: true, is_completed: true },
+    { is_task: false, is_completed: false }
+  ]
+  for (const expected of cycle) {
+    it = { ...it, ...nextFlags(it) }
+    expect({ is_task: it.is_task, is_completed: it.is_completed }).toEqual(expected)
+  }
 })
