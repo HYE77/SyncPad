@@ -1,6 +1,6 @@
 import { expect, test, vi } from 'vitest'
 import type { RealtimePostgresChangesPayload } from '@supabase/supabase-js'
-import { applyChange, nextFlags, sortItems, type Item } from './useItems'
+import { applyChange, categoriesOf, nextFlags, sortItems, type Item } from './useItems'
 
 // applyChange는 순수 함수인데 모듈이 supabase client를 끌고 온다. .env 없이 돌게 막아둔다.
 vi.mock('../../lib/supabase', () => ({ supabase: {} }))
@@ -11,6 +11,7 @@ function item(id: string, content: string): Item {
     content,
     is_task: false,
     is_completed: false,
+    category: null,
     created_at: '2026-09-11T00:00:00Z',
     updated_at: '2026-09-11T00:00:00Z'
   }
@@ -82,6 +83,22 @@ test('오래된순은 최신순의 역순', () => {
 
 test('완료여부는 미완료 먼저, 그 안에서 최신순', () => {
   expect(sortItems([완료, 옛것, 새것], 'completed')).toEqual([새것, 옛것, 완료])
+})
+
+test('탭 목록은 중복·빈값을 걸러 정렬한다', () => {
+  const withCategory = (id: string, category: string | null): Item => ({
+    ...item(id, id),
+    category
+  })
+  expect(
+    categoriesOf([
+      withCategory('a', '일'),
+      withCategory('b', null),
+      withCategory('c', ' '),
+      withCategory('d', '일'),
+      withCategory('e', '개인')
+    ])
+  ).toEqual(['개인', '일'])
 })
 
 test('정렬은 원본 배열을 건드리지 않는다', () => {
