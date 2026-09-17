@@ -64,7 +64,9 @@ export function Items({ onOpenSettings }: { onOpenSettings: () => void }): React
             {editingId === item.id ? (
               <textarea
                 autoFocus
-                value={item.content}
+                // 편집 중에는 DOM이 원본이다. value로 묶으면 한글 조합 입력이
+                // 리렌더마다 끊겨 커서가 튄다.
+                defaultValue={item.content}
                 onChange={(e) => update(item.id, e.target.value)}
                 onBlur={() => {
                   setEditingId(null)
