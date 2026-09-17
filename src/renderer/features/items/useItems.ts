@@ -7,16 +7,17 @@ export type Item = {
   content: string
   is_task: boolean
   is_completed: boolean
+  category: string | null
   created_at: string
   updated_at: string
 }
 
-export type ItemFlags = Partial<Pick<Item, 'is_task' | 'is_completed'>>
+export type ItemFlags = Partial<Pick<Item, 'is_task' | 'is_completed' | 'category'>>
 
 type UseItems = {
   items: Item[]
   error: string | null
-  create: (content?: string, isTask?: boolean) => Promise<Item | null>
+  create: (content?: string, isTask?: boolean, category?: string | null) => Promise<Item | null>
   update: (id: string, content: string) => void
   setFlags: (id: string, flags: ItemFlags) => Promise<void>
   remove: (id: string) => Promise<void>
@@ -52,6 +53,12 @@ export function nextFlags(item: Item): ItemFlags {
   if (!item.is_task) return { is_task: true, is_completed: false }
   if (!item.is_completed) return { is_completed: true }
   return { is_task: false, is_completed: false }
+}
+
+// 탭 목록은 별도 저장 없이 항목들의 category에서 파생한다 (#37).
+export function categoriesOf(items: Item[]): string[] {
+  const names = items.map((item) => item.category?.trim()).filter((name) => !!name) as string[]
+  return [...new Set(names)].sort((a, b) => a.localeCompare(b))
 }
 
 export type SortKey = 'newest' | 'oldest' | 'completed'
@@ -117,26 +124,29 @@ export function useItems(): UseItems {
   // 창을 닫거나 화면을 벗어날 때 미저장 입력을 흘리지 않게.
   useEffect(() => flush, [flush])
 
-  const create = useCallback(async (content = '', isTask = false): Promise<Item | null> => {
-    const {
-      data: { user }
-    } = await supabase.auth.getUser()
-    if (!user) {
-      setError('세션이 없다. 로그인이 필요하다.')
-      return null
-    }
-    const { data, error } = await supabase
-      .from('items')
-      .insert({ user_id: user.id, content, is_task: isTask })
-      .select()
-      .single()
-    if (error) {
-      setError(error.message)
-      return null
-    }
-    setItems((prev) => [data, ...prev])
-    return data
-  }, [])
+  const create = useCallback(
+    async (content = '', isTask = false, category: string | null = null): Promise<Item | null> => {
+      const {
+        data: { user }
+      } = await supabase.auth.getUser()
+      if (!user) {
+        setError('세션이 없다. 로그인이 필요하다.')
+        return null
+      }
+      const { data, error } = await supabase
+        .from('items')
+        .insert({ user_id: user.id, content, is_task: isTask, category })
+        .select()
+        .single()
+      if (error) {
+        setError(error.message)
+        return null
+      }
+      setItems((prev) => [data, ...prev])
+      return data
+    },
+    []
+  )
 
   const update = useCallback(
     (id: string, content: string): void => {

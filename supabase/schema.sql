@@ -7,6 +7,9 @@ create table public.items (
   content      text not null default '',
   is_task      boolean not null default false,
   is_completed boolean not null default false,
+  -- null = 미분류. 상단 탭 목록은 이 컬럼의 distinct 값에서 파생한다 (#37).
+  -- 기존 DB: alter table public.items add column category text;
+  category     text,
   sort_order   double precision not null default 0,
   created_at   timestamptz not null default now(),
   updated_at   timestamptz not null default now()

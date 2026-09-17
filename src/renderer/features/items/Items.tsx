@@ -1,6 +1,14 @@
 import { useState } from 'react'
 import { supabase } from '../../lib/supabase'
-import { firstLine, nextFlags, sortItems, useItems, type Item, type SortKey } from './useItems'
+import {
+  categoriesOf,
+  firstLine,
+  nextFlags,
+  sortItems,
+  useItems,
+  type Item,
+  type SortKey
+} from './useItems'
 
 // 마커가 항목 종류를 겸한다. 클릭하면 nextFlags 순서로 순환한다.
 function marker(item: Item): string {
@@ -13,9 +21,17 @@ export function Items({ onOpenSettings }: { onOpenSettings: () => void }): React
   const [editingId, setEditingId] = useState<string | null>(null)
   const [query, setQuery] = useState('')
   const [sort, setSort] = useState<SortKey>('newest')
+  const [category, setCategory] = useState<string | null>(null)
+  const categories = categoriesOf(items)
+  // 고른 카테고리의 마지막 항목이 사라지면 탭도 사라진다. 빈 화면에 갇히지 않게 ALL로 돌린다.
+  const active = category && categories.includes(category) ? category : null
   const q = query.trim().toLowerCase()
   const visible = sortItems(
-    q ? items.filter((item) => item.content.toLowerCase().includes(q)) : items,
+    items.filter(
+      (item) =>
+        (active === null || item.category === active) &&
+        (!q || item.content.toLowerCase().includes(q))
+    ),
     sort
   )
 
@@ -24,7 +40,7 @@ export function Items({ onOpenSettings }: { onOpenSettings: () => void }): React
       <div className="flex shrink-0 items-center gap-3 border-b border-term-dim/30 px-3 py-2">
         <button
           onClick={async () => {
-            const item = await create()
+            const item = await create('', false, active)
             if (item) setEditingId(item.id)
           }}
           className="text-sm text-term-accent hover:text-term-fg"
@@ -51,9 +67,35 @@ export function Items({ onOpenSettings }: { onOpenSettings: () => void }): React
         </select>
       </div>
 
+      <div className="flex shrink-0 gap-3 overflow-x-auto border-b border-term-dim/30 px-3 py-1">
+        {[null, ...categories].map((name) => (
+          <button
+            key={name ?? 'ALL'}
+            onClick={() => setCategory(name)}
+            aria-pressed={active === name}
+            className={`shrink-0 text-xs ${
+              active === name ? 'text-term-accent' : 'text-term-dim hover:text-term-fg'
+            }`}
+          >
+            {name ?? 'ALL'}
+          </button>
+        ))}
+      </div>
+
       <ul className="min-h-0 flex-1 overflow-y-auto">
         {visible.map((item) => (
-          <li key={item.id} className="group flex items-start gap-2 px-3 py-1 hover:bg-white/5">
+          <li
+            key={item.id}
+            // textarea에 걸면 카테고리 입력을 누르는 순간 편집이 닫힌다. 행 밖으로 나갈 때만 닫는다.
+            onBlur={(e) => {
+              if (editingId !== item.id || e.currentTarget.contains(e.relatedTarget)) return
+              setEditingId(null)
+              // 빈 행은 남겨두면 목록만 지저분해진다.
+              if (item.content.trim()) flush()
+              else void remove(item.id)
+            }}
+            className="group flex items-start gap-2 px-3 py-1 hover:bg-white/5"
+          >
             <button
               onClick={() => void setFlags(item.id, nextFlags(item))}
               aria-label={`${firstLine(item.content)} 마커 (${marker(item)})`}
@@ -68,12 +110,6 @@ export function Items({ onOpenSettings }: { onOpenSettings: () => void }): React
                 // 리렌더마다 끊겨 커서가 튄다.
                 defaultValue={item.content}
                 onChange={(e) => update(item.id, e.target.value)}
-                onBlur={() => {
-                  setEditingId(null)
-                  // 빈 행은 남겨두면 목록만 지저분해진다.
-                  if (item.content.trim()) flush()
-                  else void remove(item.id)
-                }}
                 aria-label="항목 내용"
                 // field-sizing으로 내용만큼만 늘린다. 높이 계산용 JS가 필요 없다.
                 className="min-w-0 flex-1 resize-none bg-transparent py-0.5 text-sm outline-none select-text [field-sizing:content]"
@@ -88,6 +124,25 @@ export function Items({ onOpenSettings }: { onOpenSettings: () => void }): React
                 {firstLine(item.content)}
               </button>
             )}
+            {editingId === item.id ? (
+              // datalist로 기존 카테고리를 고르고, 새 이름을 타이핑하면 그게 새 카테고리다.
+              <input
+                list="syncpad-categories"
+                defaultValue={item.category ?? ''}
+                onKeyDown={(e) => e.key === 'Enter' && e.currentTarget.blur()}
+                onBlur={(e) => {
+                  const next = e.target.value.trim() || null
+                  if (next !== item.category) void setFlags(item.id, { category: next })
+                }}
+                placeholder="카테고리"
+                aria-label="항목 카테고리"
+                className="w-24 shrink-0 bg-transparent py-0.5 text-xs text-term-dim outline-none select-text placeholder:text-term-dim/50"
+              />
+            ) : (
+              item.category && (
+                <span className="shrink-0 py-0.5 text-xs text-term-dim">#{item.category}</span>
+              )
+            )}
             <button
               onClick={() => void remove(item.id)}
               aria-label={`${firstLine(item.content)} 삭제`}
@@ -98,6 +153,11 @@ export function Items({ onOpenSettings }: { onOpenSettings: () => void }): React
           </li>
         ))}
       </ul>
+      <datalist id="syncpad-categories">
+        {categories.map((name) => (
+          <option key={name} value={name} />
+        ))}
+      </datalist>
 
       <div className="flex shrink-0 border-t border-term-dim/30">
         <button
