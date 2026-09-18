@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../../lib/supabase'
+import { Button } from '../../components/Button'
+import { TextInput } from '../../components/TextInput'
 
 // main/index.ts의 CALLBACK_PREFIX, Supabase 콘솔의 Redirect URLs와 같아야 한다.
 const REDIRECT_TO = 'syncpad://auth/callback'
@@ -72,49 +74,48 @@ export function Login(): React.JSX.Element {
         className="flex w-72 flex-col gap-3"
       >
         <h1 className="text-term-accent text-sm">SyncPad</h1>
-        <input
+        <TextInput
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
           autoFocus
           placeholder="이메일"
-          className="border-term-dim/30 placeholder:text-term-dim border bg-transparent px-3 py-2 text-sm outline-none select-text"
+          bordered
         />
-        <input
+        <TextInput
           type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
           minLength={6}
           placeholder="비밀번호"
-          className="border-term-dim/30 placeholder:text-term-dim border bg-transparent px-3 py-2 text-sm outline-none select-text"
+          bordered
         />
         <div className="flex gap-2">
-          <button
-            type="submit"
-            disabled={busy}
-            className="border-term-accent/50 text-term-accent flex-1 border py-2 text-sm hover:bg-white/5 disabled:opacity-50"
-          >
+          <Button type="submit" disabled={busy} variant="outline" tone="accent" className="flex-1">
             로그인
-          </button>
-          <button
+          </Button>
+          <Button
             type="button"
             disabled={busy}
             onClick={() => void submit('signUp')}
-            className="border-term-dim/30 text-term-dim flex-1 border py-2 text-sm hover:bg-white/5 disabled:opacity-50"
+            variant="outline"
+            tone="dim"
+            className="flex-1"
           >
             가입
-          </button>
+          </Button>
         </div>
-        <button
+        <Button
           type="button"
           disabled={busy}
           onClick={() => void signInWithGoogle()}
-          className="border-term-dim/30 text-term-dim border py-2 text-sm hover:bg-white/5 disabled:opacity-50"
+          variant="outline"
+          tone="dim"
         >
           Google로 계속하기
-        </button>
+        </Button>
         {error && <p className="text-xs text-red-400">{error}</p>}
       </form>
     </main>

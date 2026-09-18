@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Button } from '../../components/Button'
 import { ACCENTS, loadAccent, saveAccent } from './accent'
 
 export function Settings({ onClose }: { onClose: () => void }): React.JSX.Element {
@@ -8,9 +9,9 @@ export function Settings({ onClose }: { onClose: () => void }): React.JSX.Elemen
     <main className="flex h-screen flex-col">
       <header className="flex items-center border-b border-term-dim/30 px-4 py-2 text-sm">
         <h1>설정</h1>
-        <button onClick={onClose} className="ml-auto text-term-dim hover:text-term-fg">
+        <Button onClick={onClose} className="ml-auto">
           닫기
-        </button>
+        </Button>
       </header>
       <section className="p-4">
         <h2 className="mb-3 text-sm text-term-dim">하이라이트 컬러</h2>
