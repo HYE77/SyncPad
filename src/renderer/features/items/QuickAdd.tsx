@@ -30,37 +30,46 @@ function QuickList(): React.JSX.Element {
   }
 
   return (
-    <div className="flex h-screen flex-col">
+    <div className="bg-term-surface flex h-screen flex-col">
       <form
         onSubmit={(e) => {
           e.preventDefault()
           void submit()
         }}
-        className="flex items-center gap-2 border-b border-term-dim/30 px-3 py-2"
+        className="shrink-0 px-3.5 pt-3.5 pb-2.5"
       >
-        <TextInput
-          value={content}
-          onChange={(e) => setContent(e.target.value)}
-          autoFocus
-          placeholder="빠른 메모 (Enter)"
-          aria-label="빠른 메모"
-          className="min-w-0 flex-1"
-        />
-        <label className="flex shrink-0 items-center gap-1 text-xs text-term-dim">
-          <input
-            type="checkbox"
-            checked={isTask}
-            onChange={(e) => setIsTask(e.target.checked)}
-            className="accent-term-accent"
+        <div className="border-term-accent bg-term-surface2 flex items-center gap-2 rounded-md border px-2.5 py-2">
+          <span className="text-term-accent text-sm">&gt;</span>
+          <TextInput
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+            autoFocus
+            placeholder="빠른 메모 (Enter)"
+            aria-label="빠른 메모"
+            className="min-w-0 flex-1"
           />
-          할일
-        </label>
+          <label className="text-term-dim flex shrink-0 items-center gap-1 text-xs">
+            <input
+              type="checkbox"
+              checked={isTask}
+              onChange={(e) => setIsTask(e.target.checked)}
+              className="accent-term-accent"
+            />
+            할일
+          </label>
+        </div>
       </form>
 
-      <ul className="min-h-0 flex-1 overflow-y-auto">
+      <p className="text-term-faint shrink-0 px-3.5 py-1.5 text-[11px] tracking-wide">
+        -- recent --
+      </p>
+      <ul className="min-h-0 flex-1 overflow-y-auto px-3.5">
         {items.slice(0, VISIBLE).map((item) => (
-          <li key={item.id} className="flex items-center gap-2 px-3 py-1.5 text-sm">
-            {item.is_task && (
+          <li
+            key={item.id}
+            className="border-term-line flex items-baseline gap-2 border-b py-1.5 text-[12.5px]"
+          >
+            {item.is_task ? (
               <input
                 type="checkbox"
                 checked={item.is_completed}
@@ -68,6 +77,8 @@ function QuickList(): React.JSX.Element {
                 aria-label={`${firstLine(item.content)} 완료`}
                 className="accent-term-accent"
               />
+            ) : (
+              <span className="text-term-accent">*</span>
             )}
             <span
               className={`truncate ${
@@ -80,7 +91,9 @@ function QuickList(): React.JSX.Element {
         ))}
       </ul>
 
-      <p className="border-t border-term-dim/30 px-3 py-1 text-xs text-term-dim">Esc로 닫는다</p>
+      <p className="border-term-line text-term-faint shrink-0 border-t px-3.5 py-2 text-right text-[11px]">
+        Esc로 닫는다
+      </p>
       {error && <p className="bg-red-950 px-3 py-1 text-xs text-red-300">{error}</p>}
     </div>
   )
