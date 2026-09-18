@@ -6,6 +6,30 @@ import { TextInput } from '../../components/TextInput'
 // main/index.ts의 CALLBACK_PREFIX, Supabase 콘솔의 Redirect URLs와 같아야 한다.
 const REDIRECT_TO = 'syncpad://auth/callback'
 
+// 브랜드 로고라 토큰 대신 Google 공식 색을 쓴다.
+function GoogleLogo(): React.JSX.Element {
+  return (
+    <svg viewBox="0 0 18 18" className="size-4" aria-hidden="true">
+      <path
+        fill="#4285F4"
+        d="M17.64 9.2045c0-.6381-.0573-1.2518-.1636-1.8409H9v3.4814h4.8436c-.2086 1.125-.8427 2.0782-1.7959 2.7164v2.2581h2.9087c1.7018-1.5668 2.6836-3.874 2.6836-6.615z"
+      />
+      <path
+        fill="#34A853"
+        d="M9 18c2.43 0 4.4673-.806 5.9564-2.1805l-2.9087-2.2581c-.8059.54-1.8368.859-3.0477.859-2.344 0-4.3282-1.5831-5.036-3.7104H.9574v2.3318C2.4382 15.9832 5.4818 18 9 18z"
+      />
+      <path
+        fill="#FBBC05"
+        d="M3.964 10.71c-.18-.54-.2823-1.1168-.2823-1.71s.1023-1.17.2823-1.71V4.9582H.9573A8.9965 8.9965 0 0 0 0 9c0 1.4523.3477 2.8268.9573 4.0418L3.964 10.71z"
+      />
+      <path
+        fill="#EA4335"
+        d="M9 3.5795c1.3214 0 2.5077.4541 3.4405 1.346l2.5813-2.5814C13.4632.8918 11.426 0 9 0 5.4818 0 2.4382 2.0168.9573 4.9582L3.964 7.29C4.6718 5.1627 6.6559 3.5795 9 3.5795z"
+      />
+    </svg>
+  )
+}
+
 export function Login(): React.JSX.Element {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -71,9 +95,12 @@ export function Login(): React.JSX.Element {
           e.preventDefault()
           void submit('signIn')
         }}
-        className="flex w-72 flex-col gap-3"
+        className="flex w-80 flex-col gap-3"
       >
-        <h1 className="text-term-accent text-sm">SyncPad</h1>
+        <div className="mb-4 flex flex-col items-center gap-2">
+          <h1 className="text-[28px] font-bold tracking-tight">&gt;_ SyncPad</h1>
+          <p className="text-term-dim text-[12.5px]">terminal notes, synced everywhere</p>
+        </div>
         <TextInput
           type="email"
           value={email}
@@ -82,6 +109,7 @@ export function Login(): React.JSX.Element {
           autoFocus
           placeholder="이메일"
           bordered
+          className="bg-term-surface2 rounded-md"
         />
         <TextInput
           type="password"
@@ -91,9 +119,16 @@ export function Login(): React.JSX.Element {
           minLength={6}
           placeholder="비밀번호"
           bordered
+          className="bg-term-surface2 rounded-md"
         />
         <div className="flex gap-2">
-          <Button type="submit" disabled={busy} variant="outline" tone="accent" className="flex-1">
+          <Button
+            type="submit"
+            disabled={busy}
+            variant="outline"
+            tone="accent"
+            className="flex-1 rounded-md"
+          >
             로그인
           </Button>
           <Button
@@ -102,7 +137,7 @@ export function Login(): React.JSX.Element {
             onClick={() => void submit('signUp')}
             variant="outline"
             tone="dim"
-            className="flex-1"
+            className="flex-1 rounded-md"
           >
             가입
           </Button>
@@ -113,10 +148,14 @@ export function Login(): React.JSX.Element {
           onClick={() => void signInWithGoogle()}
           variant="outline"
           tone="dim"
+          className="flex items-center justify-center gap-2.5 rounded-md"
         >
-          Google로 계속하기
+          <GoogleLogo />[ continue with google ]
         </Button>
         {error && <p className="text-xs text-red-400">{error}</p>}
+        <p className="text-term-faint mt-2 text-center text-[11px]">
+          Mac &amp; Windows · synced everywhere
+        </p>
       </form>
     </main>
   )
