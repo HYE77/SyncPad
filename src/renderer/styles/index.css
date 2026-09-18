@@ -1,11 +1,12 @@
 @import 'tailwindcss';
 
 @theme {
-  --font-mono: 'SF Mono', 'JetBrains Mono', Menlo, Consolas, monospace;
-  --color-term-bg: #0d0f12;
-  --color-term-fg: #d4d4d4;
-  --color-term-dim: #6b7280;
-  --color-term-accent: #4ade80;
+  --font-mono: 'JetBrains Mono', 'SF Mono', Menlo, Consolas, monospace;
+  --color-term-bg: oklch(0.16 0.012 250);
+  --color-term-fg: oklch(0.93 0.01 250);
+  --color-term-dim: oklch(0.6 0.012 250);
+  --color-term-accent: #dba86a;
+  --color-term-cyan: oklch(0.72 0.1 200);
 }
 
 body {

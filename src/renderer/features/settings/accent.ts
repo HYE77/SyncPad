@@ -1,11 +1,11 @@
 const KEY = 'syncpad.accent'
 
-// Claude Design에서 확정되기 전까지 쓰는 터미널 팔레트 후보 4색.
+// Claude Design 목업(메모 할일 통합 앱 UI)에서 확정한 터미널 팔레트 후보 4색.
 export const ACCENTS = [
-  { name: '그린', hex: '#4ade80' },
-  { name: '앰버', hex: '#fbbf24' },
-  { name: '시안', hex: '#22d3ee' },
-  { name: '마젠타', hex: '#e879f9' }
+  { name: '앰버', hex: '#dba86a' },
+  { name: '시안', hex: '#5ec9d6' },
+  { name: '그린', hex: '#7fd08a' },
+  { name: '마젠타', hex: '#d68fd6' }
 ] as const
 
 // 저장값이 없거나 후보에 없는 값(구버전·손댄 값)이면 기본색으로 되돌린다.
