@@ -1,20 +1,10 @@
 import { useState } from 'react'
 import { supabase } from '../../lib/supabase'
-import {
-  categoriesOf,
-  firstLine,
-  nextFlags,
-  sortItems,
-  useItems,
-  type Item,
-  type SortKey
-} from './useItems'
-
-// 마커가 항목 종류를 겸한다. 클릭하면 nextFlags 순서로 순환한다.
-function marker(item: Item): string {
-  if (!item.is_task) return '-'
-  return item.is_completed ? '[x]' : '[ ]'
-}
+import { Button } from '../../components/Button'
+import { CategoryTab } from '../../components/CategoryTab'
+import { ItemRow } from '../../components/ItemRow'
+import { TextInput } from '../../components/TextInput'
+import { categoriesOf, nextFlags, sortItems, useItems, type SortKey } from './useItems'
 
 export function Items({ onOpenSettings }: { onOpenSettings: () => void }): React.JSX.Element {
   const { items, error, create, update, setFlags, remove, flush } = useItems()
@@ -38,22 +28,23 @@ export function Items({ onOpenSettings }: { onOpenSettings: () => void }): React
   return (
     <main className="flex h-screen flex-col">
       <div className="flex shrink-0 items-center gap-3 border-b border-term-dim/30 px-3 py-2">
-        <button
+        <Button
+          variant="ghost"
+          tone="accent"
           onClick={async () => {
             const item = await create('', false, active)
             if (item) setEditingId(item.id)
           }}
-          className="text-sm text-term-accent hover:text-term-fg"
         >
           + 새 항목
-        </button>
-        <input
+        </Button>
+        <TextInput
           type="search"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="검색"
           aria-label="항목 검색"
-          className="min-w-0 flex-1 bg-transparent text-sm outline-none select-text placeholder:text-term-dim"
+          className="min-w-0 flex-1"
         />
         <select
           value={sort}
@@ -69,88 +60,36 @@ export function Items({ onOpenSettings }: { onOpenSettings: () => void }): React
 
       <div className="flex shrink-0 gap-3 overflow-x-auto border-b border-term-dim/30 px-3 py-1">
         {[null, ...categories].map((name) => (
-          <button
+          <CategoryTab
             key={name ?? 'ALL'}
+            name={name}
+            active={active === name}
             onClick={() => setCategory(name)}
-            aria-pressed={active === name}
-            className={`shrink-0 text-xs ${
-              active === name ? 'text-term-accent' : 'text-term-dim hover:text-term-fg'
-            }`}
-          >
-            {name ?? 'ALL'}
-          </button>
+          />
         ))}
       </div>
 
       <ul className="min-h-0 flex-1 overflow-y-auto">
         {visible.map((item) => (
-          <li
+          <ItemRow
             key={item.id}
-            // textarea에 걸면 카테고리 입력을 누르는 순간 편집이 닫힌다. 행 밖으로 나갈 때만 닫는다.
-            onBlur={(e) => {
+            item={item}
+            editing={editingId === item.id}
+            onBlurRow={(e) => {
               if (editingId !== item.id || e.currentTarget.contains(e.relatedTarget)) return
               setEditingId(null)
               // 빈 행은 남겨두면 목록만 지저분해진다.
               if (item.content.trim()) flush()
               else void remove(item.id)
             }}
-            className="group flex items-start gap-2 px-3 py-1 hover:bg-white/5"
-          >
-            <button
-              onClick={() => void setFlags(item.id, nextFlags(item))}
-              aria-label={`${firstLine(item.content)} 마커 (${marker(item)})`}
-              className="shrink-0 py-0.5 font-mono text-sm text-term-accent"
-            >
-              {marker(item)}
-            </button>
-            {editingId === item.id ? (
-              <textarea
-                autoFocus
-                // 편집 중에는 DOM이 원본이다. value로 묶으면 한글 조합 입력이
-                // 리렌더마다 끊겨 커서가 튄다.
-                defaultValue={item.content}
-                onChange={(e) => update(item.id, e.target.value)}
-                aria-label="항목 내용"
-                // field-sizing으로 내용만큼만 늘린다. 높이 계산용 JS가 필요 없다.
-                className="min-w-0 flex-1 resize-none bg-transparent py-0.5 text-sm outline-none select-text [field-sizing:content]"
-              />
-            ) : (
-              <button
-                onClick={() => setEditingId(item.id)}
-                className={`min-w-0 flex-1 truncate py-0.5 text-left text-sm ${
-                  item.is_completed ? 'text-term-dim line-through' : 'text-term-fg'
-                }`}
-              >
-                {firstLine(item.content)}
-              </button>
-            )}
-            {editingId === item.id ? (
-              // datalist로 기존 카테고리를 고르고, 새 이름을 타이핑하면 그게 새 카테고리다.
-              <input
-                list="syncpad-categories"
-                defaultValue={item.category ?? ''}
-                onKeyDown={(e) => e.key === 'Enter' && e.currentTarget.blur()}
-                onBlur={(e) => {
-                  const next = e.target.value.trim() || null
-                  if (next !== item.category) void setFlags(item.id, { category: next })
-                }}
-                placeholder="카테고리"
-                aria-label="항목 카테고리"
-                className="w-24 shrink-0 bg-transparent py-0.5 text-xs text-term-dim outline-none select-text placeholder:text-term-dim/50"
-              />
-            ) : (
-              item.category && (
-                <span className="shrink-0 py-0.5 text-xs text-term-dim">#{item.category}</span>
-              )
-            )}
-            <button
-              onClick={() => void remove(item.id)}
-              aria-label={`${firstLine(item.content)} 삭제`}
-              className="shrink-0 py-0.5 text-sm text-term-dim opacity-0 group-hover:opacity-100 hover:text-red-400"
-            >
-              ×
-            </button>
-          </li>
+            onToggleFlag={() => void setFlags(item.id, nextFlags(item))}
+            onStartEdit={() => setEditingId(item.id)}
+            onChangeContent={(value) => update(item.id, value)}
+            onChangeCategory={(next) => {
+              if (next !== item.category) void setFlags(item.id, { category: next })
+            }}
+            onDelete={() => void remove(item.id)}
+          />
         ))}
       </ul>
       <datalist id="syncpad-categories">
@@ -160,18 +99,12 @@ export function Items({ onOpenSettings }: { onOpenSettings: () => void }): React
       </datalist>
 
       <div className="flex shrink-0 border-t border-term-dim/30">
-        <button
-          onClick={onOpenSettings}
-          className="px-3 py-2 text-sm text-term-dim hover:bg-white/5 hover:text-term-fg"
-        >
+        <Button onClick={onOpenSettings} className="px-3 py-2">
           설정
-        </button>
-        <button
-          onClick={() => void supabase.auth.signOut()}
-          className="px-3 py-2 text-sm text-term-dim hover:bg-white/5 hover:text-term-fg"
-        >
+        </Button>
+        <Button onClick={() => void supabase.auth.signOut()} className="px-3 py-2">
           로그아웃
-        </button>
+        </Button>
       </div>
 
       {error && (

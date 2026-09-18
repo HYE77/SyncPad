@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { TextInput } from '../../components/TextInput'
 import { useSession } from '../auth/useSession'
 import { firstLine, useItems } from './useItems'
 
@@ -37,13 +38,13 @@ function QuickList(): React.JSX.Element {
         }}
         className="flex items-center gap-2 border-b border-term-dim/30 px-3 py-2"
       >
-        <input
+        <TextInput
           value={content}
           onChange={(e) => setContent(e.target.value)}
           autoFocus
           placeholder="빠른 메모 (Enter)"
           aria-label="빠른 메모"
-          className="min-w-0 flex-1 bg-transparent text-sm outline-none select-text placeholder:text-term-dim"
+          className="min-w-0 flex-1"
         />
         <label className="flex shrink-0 items-center gap-1 text-xs text-term-dim">
           <input
