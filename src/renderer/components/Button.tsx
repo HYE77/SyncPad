@@ -7,7 +7,7 @@ const STYLES: Record<`${Variant}-${Tone}`, string> = {
   'ghost-accent': 'text-term-accent hover:text-term-fg',
   'outline-accent':
     'border-term-accent/50 text-term-accent border py-2 hover:bg-white/5 disabled:opacity-50',
-  'outline-dim': 'border-term-dim/30 text-term-dim border py-2 hover:bg-white/5 disabled:opacity-50'
+  'outline-dim': 'border-term-line text-term-dim border py-2 hover:bg-white/5 disabled:opacity-50'
 }
 
 type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {

@@ -5,6 +5,10 @@
   --color-term-bg: oklch(0.16 0.012 250);
   --color-term-fg: oklch(0.93 0.01 250);
   --color-term-dim: oklch(0.6 0.012 250);
+  --color-term-surface: oklch(0.185 0.012 250);
+  --color-term-surface2: oklch(0.215 0.012 250);
+  --color-term-line: oklch(0.36 0.012 250 / 0.55);
+  --color-term-faint: oklch(0.42 0.012 250);
   --color-term-accent: #dba86a;
   --color-term-cyan: oklch(0.72 0.1 200);
 }

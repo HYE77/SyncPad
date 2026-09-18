@@ -2,7 +2,7 @@ import { firstLine, type Item } from '../features/items/useItems'
 
 // 마커가 항목 종류를 겸한다. 클릭하면 nextFlags 순서로 순환한다.
 function marker(item: Item): string {
-  if (!item.is_task) return '-'
+  if (!item.is_task) return '*'
   return item.is_completed ? '[x]' : '[ ]'
 }
 
@@ -29,12 +29,12 @@ export function ItemRow({
     <li
       // textarea에 걸면 카테고리 입력을 누르는 순간 편집이 닫힌다. 행 밖으로 나갈 때만 닫는다.
       onBlur={onBlurRow}
-      className="group flex items-start gap-2 px-3 py-1 hover:bg-white/5"
+      className="group flex items-start gap-2.5 border-b border-term-line px-4 py-2 hover:bg-white/5"
     >
       <button
         onClick={onToggleFlag}
         aria-label={`${firstLine(item.content)} 마커 (${marker(item)})`}
-        className="shrink-0 py-0.5 font-mono text-sm text-term-accent"
+        className="w-8 shrink-0 py-0.5 text-left font-mono text-sm text-term-accent"
       >
         {marker(item)}
       </button>
