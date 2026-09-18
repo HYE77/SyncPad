@@ -72,7 +72,7 @@ export function ItemRow({
         />
       ) : (
         item.category && (
-          <span className="shrink-0 py-0.5 text-xs text-term-dim">#{item.category}</span>
+          <span className="shrink-0 py-0.5 text-xs text-term-cyan">#{item.category}</span>
         )
       )}
       <button
