@@ -71,9 +71,12 @@ export function Login(): React.JSX.Element {
           e.preventDefault()
           void submit('signIn')
         }}
-        className="flex w-72 flex-col gap-3"
+        className="flex w-80 flex-col gap-3"
       >
-        <h1 className="text-term-accent text-sm">SyncPad</h1>
+        <div className="mb-4 flex flex-col items-center gap-2">
+          <h1 className="text-[28px] font-bold tracking-tight">&gt;_ SyncPad</h1>
+          <p className="text-term-dim text-[12.5px]">terminal notes, synced everywhere</p>
+        </div>
         <TextInput
           type="email"
           value={email}
@@ -82,6 +85,7 @@ export function Login(): React.JSX.Element {
           autoFocus
           placeholder="이메일"
           bordered
+          className="bg-term-surface2 rounded-md"
         />
         <TextInput
           type="password"
@@ -91,9 +95,16 @@ export function Login(): React.JSX.Element {
           minLength={6}
           placeholder="비밀번호"
           bordered
+          className="bg-term-surface2 rounded-md"
         />
         <div className="flex gap-2">
-          <Button type="submit" disabled={busy} variant="outline" tone="accent" className="flex-1">
+          <Button
+            type="submit"
+            disabled={busy}
+            variant="outline"
+            tone="accent"
+            className="flex-1 rounded-md"
+          >
             로그인
           </Button>
           <Button
@@ -102,7 +113,7 @@ export function Login(): React.JSX.Element {
             onClick={() => void submit('signUp')}
             variant="outline"
             tone="dim"
-            className="flex-1"
+            className="flex-1 rounded-md"
           >
             가입
           </Button>
@@ -113,10 +124,14 @@ export function Login(): React.JSX.Element {
           onClick={() => void signInWithGoogle()}
           variant="outline"
           tone="dim"
+          className="rounded-md"
         >
-          Google로 계속하기
+          [ continue with google ]
         </Button>
         {error && <p className="text-xs text-red-400">{error}</p>}
+        <p className="text-term-faint mt-2 text-center text-[11px]">
+          Mac &amp; Windows · synced everywhere
+        </p>
       </form>
     </main>
   )
