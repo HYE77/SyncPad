@@ -11,9 +11,13 @@ export function CategoryTab({
     <button
       onClick={onClick}
       aria-pressed={active}
-      className={`shrink-0 text-xs ${active ? 'text-term-accent' : 'text-term-dim hover:text-term-fg'}`}
+      className={`shrink-0 rounded border px-2.5 py-1 text-xs ${
+        active
+          ? 'border-term-accent text-term-accent'
+          : 'border-term-line text-term-dim hover:text-term-fg'
+      }`}
     >
-      {name ?? 'ALL'}
+      {name ? `#${name}` : 'ALL'}
     </button>
   )
 }

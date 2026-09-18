@@ -27,7 +27,7 @@ export function Items({ onOpenSettings }: { onOpenSettings: () => void }): React
 
   return (
     <main className="flex h-screen flex-col">
-      <div className="flex shrink-0 items-center gap-3 border-b border-term-dim/30 px-3 py-2">
+      <div className="flex shrink-0 items-center gap-3 border-b border-term-line px-4 py-3">
         <Button
           variant="ghost"
           tone="accent"
@@ -38,19 +38,22 @@ export function Items({ onOpenSettings }: { onOpenSettings: () => void }): React
         >
           + 새 항목
         </Button>
-        <TextInput
-          type="search"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="검색"
-          aria-label="항목 검색"
-          className="min-w-0 flex-1"
-        />
+        <label className="border-term-line bg-term-surface2 flex min-w-0 flex-1 items-center gap-2 rounded-md border px-3 py-1.5">
+          <span className="text-term-faint text-sm">$ grep</span>
+          <TextInput
+            type="search"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="검색"
+            aria-label="항목 검색"
+            className="min-w-0 flex-1"
+          />
+        </label>
         <select
           value={sort}
           onChange={(e) => setSort(e.target.value as SortKey)}
           aria-label="정렬 기준"
-          className="shrink-0 bg-term-bg text-sm text-term-dim outline-none"
+          className="bg-term-bg text-term-dim shrink-0 text-sm outline-none"
         >
           <option value="newest">최신순</option>
           <option value="oldest">오래된순</option>
@@ -58,7 +61,7 @@ export function Items({ onOpenSettings }: { onOpenSettings: () => void }): React
         </select>
       </div>
 
-      <div className="flex shrink-0 gap-3 overflow-x-auto border-b border-term-dim/30 px-3 py-1">
+      <div className="flex shrink-0 gap-2 overflow-x-auto border-b border-term-line px-4 py-2">
         {[null, ...categories].map((name) => (
           <CategoryTab
             key={name ?? 'ALL'}
@@ -98,7 +101,7 @@ export function Items({ onOpenSettings }: { onOpenSettings: () => void }): React
         ))}
       </datalist>
 
-      <div className="flex shrink-0 border-t border-term-dim/30">
+      <div className="border-term-line text-term-faint flex shrink-0 border-t">
         <Button onClick={onOpenSettings} className="px-3 py-2">
           설정
         </Button>
