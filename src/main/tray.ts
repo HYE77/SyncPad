@@ -4,7 +4,7 @@ import { is } from '@electron-toolkit/utils'
 import iconPath from '../../resources/trayIconTemplate.png?asset'
 import { popupPosition } from './popupPosition'
 
-const POPUP = { width: 360, height: 420 }
+const POPUP = { width: 320, height: 420 }
 
 // GC되면 아이콘이 메뉴바에서 사라진다. 모듈 밖으로 내보내 참조를 붙잡아 둔다.
 export let tray: Tray | null = null
