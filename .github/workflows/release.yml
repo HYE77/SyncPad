@@ -1,0 +1,40 @@
+name: Release
+
+# v* 태그를 푸시하면 mac/win 설치 파일을 빌드해 GitHub Release에 올린다.
+# 코드 서명·공증·자동 업데이트는 범위 밖이다 (#51).
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    strategy:
+      matrix:
+        include:
+          - os: macos-latest
+            script: build:mac
+          - os: windows-latest
+            script: build:win
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      # Vite가 빌드 시점에 renderer 번들로 인라인한다. anon key는 공개 키다.
+      - run: npm run ${{ matrix.script }} -- --publish never
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+      - name: Upload to release
+        shell: bash
+        run: |
+          gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1 || gh release create "$GITHUB_REF_NAME" --generate-notes
+          gh release upload "$GITHUB_REF_NAME" dist/*.dmg dist/*-setup.exe --clobber
+        env:
+          GH_TOKEN: ${{ github.token }}
