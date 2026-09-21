@@ -25,17 +25,15 @@ export function Items({ onOpenSettings }: { onOpenSettings: () => void }): React
     sort
   )
 
+  async function addItem(): Promise<void> {
+    const item = await create('', false, active)
+    if (item) setEditingId(item.id)
+  }
+
   return (
     <main className="flex h-screen flex-col">
       <div className="flex shrink-0 items-center gap-3 border-b border-term-line px-4 py-3">
-        <Button
-          variant="ghost"
-          tone="accent"
-          onClick={async () => {
-            const item = await create('', false, active)
-            if (item) setEditingId(item.id)
-          }}
-        >
+        <Button variant="ghost" tone="accent" onClick={() => void addItem()}>
           + 새 항목
         </Button>
         <label className="border-term-line bg-term-surface2 flex min-w-0 flex-1 items-center gap-2 rounded-md border px-3 py-1.5">
@@ -72,29 +70,33 @@ export function Items({ onOpenSettings }: { onOpenSettings: () => void }): React
         ))}
       </div>
 
-      <ul className="min-h-0 flex-1 overflow-y-auto">
-        {visible.map((item) => (
-          <ItemRow
-            key={item.id}
-            item={item}
-            editing={editingId === item.id}
-            onBlurRow={(e) => {
-              if (editingId !== item.id || e.currentTarget.contains(e.relatedTarget)) return
-              setEditingId(null)
-              // 빈 행은 남겨두면 목록만 지저분해진다.
-              if (item.content.trim()) flush()
-              else void remove(item.id)
-            }}
-            onToggleFlag={() => void setFlags(item.id, nextFlags(item))}
-            onStartEdit={() => setEditingId(item.id)}
-            onChangeContent={(value) => update(item.id, value)}
-            onChangeCategory={(next) => {
-              if (next !== item.category) void setFlags(item.id, { category: next })
-            }}
-            onDelete={() => void remove(item.id)}
-          />
-        ))}
-      </ul>
+      <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">
+        <ul>
+          {visible.map((item) => (
+            <ItemRow
+              key={item.id}
+              item={item}
+              editing={editingId === item.id}
+              onBlurRow={(e) => {
+                if (editingId !== item.id || e.currentTarget.contains(e.relatedTarget)) return
+                setEditingId(null)
+                // 빈 행은 남겨두면 목록만 지저분해진다.
+                if (item.content.trim()) flush()
+                else void remove(item.id)
+              }}
+              onToggleFlag={() => void setFlags(item.id, nextFlags(item))}
+              onStartEdit={() => setEditingId(item.id)}
+              onChangeContent={(value) => update(item.id, value)}
+              onChangeCategory={(next) => {
+                if (next !== item.category) void setFlags(item.id, { category: next })
+              }}
+              onDelete={() => void remove(item.id)}
+            />
+          ))}
+        </ul>
+        {/* 목록 아래 남는 공간 전체가 클릭 영역이다. */}
+        <div onClick={() => void addItem()} aria-hidden className="min-h-8 flex-1" />
+      </div>
       <datalist id="syncpad-categories">
         {categories.map((name) => (
           <option key={name} value={name} />
