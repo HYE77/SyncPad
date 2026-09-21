@@ -8,6 +8,7 @@ export type Item = {
   is_task: boolean
   is_completed: boolean
   category: string | null
+  sort_order: number
   created_at: string
   updated_at: string
 }
@@ -21,6 +22,7 @@ type UseItems = {
   update: (id: string, content: string) => void
   setFlags: (id: string, flags: ItemFlags) => Promise<void>
   remove: (id: string) => Promise<void>
+  move: (dragId: string, targetId: string) => void
   flush: () => void
 }
 
@@ -61,19 +63,45 @@ export function categoriesOf(items: Item[]): string[] {
   return [...new Set(names)].sort((a, b) => a.localeCompare(b))
 }
 
-export type SortKey = 'newest' | 'oldest' | 'completed'
+export type SortKey = 'manual' | 'newest' | 'oldest'
 
 const newestFirst = (a: Item, b: Item): number =>
   Date.parse(b.created_at) - Date.parse(a.created_at)
 
-// 완료여부는 미완료를 먼저 보여주고, 같은 그룹 안에서는 최신순.
+const byKey: Record<SortKey, (a: Item, b: Item) => number> = {
+  // 새 항목은 sort_order 0이라 재정렬된(1..n) 항목들 위에 붙는다.
+  manual: (a, b) => a.sort_order - b.sort_order || newestFirst(a, b),
+  newest: newestFirst,
+  oldest: (a, b) => newestFirst(b, a)
+}
+
+// 완료 항목은 어떤 정렬에서도 미완료 아래로 간다. 같은 그룹 안에서 key로 정렬한다.
 export function sortItems(items: Item[], key: SortKey): Item[] {
-  if (key === 'oldest') return [...items].sort((a, b) => newestFirst(b, a))
-  if (key === 'completed')
-    return [...items].sort(
-      (a, b) => Number(a.is_completed) - Number(b.is_completed) || newestFirst(a, b)
-    )
-  return [...items].sort(newestFirst)
+  return [...items].sort(
+    (a, b) => Number(a.is_completed) - Number(b.is_completed) || byKey[key](a, b)
+  )
+}
+
+// dragId를 targetId 자리로 옮기고, 같은 완료 그룹 전체를 1..n으로 다시 매겨 바뀐 행만 돌려준다.
+// 필터와 무관하게 전체 그룹 기준이라 숨겨진 카테고리 항목과의 상대 순서도 유지된다.
+// 그룹이 다르면(완료 항목을 미완료 위로 등) 빈 배열 = 막는다.
+export function reorder(
+  items: Item[],
+  dragId: string,
+  targetId: string
+): { id: string; sort_order: number }[] {
+  const drag = items.find((item) => item.id === dragId)
+  const target = items.find((item) => item.id === targetId)
+  if (!drag || !target || dragId === targetId || drag.is_completed !== target.is_completed)
+    return []
+  const group = sortItems(items, 'manual').filter((item) => item.is_completed === drag.is_completed)
+  const from = group.findIndex((item) => item.id === dragId)
+  const to = group.findIndex((item) => item.id === targetId)
+  group.splice(to, 0, ...group.splice(from, 1))
+  return group
+    .map((item, i) => ({ item, sort_order: i + 1 }))
+    .filter(({ item, sort_order }) => item.sort_order !== sort_order)
+    .map(({ item, sort_order }) => ({ id: item.id, sort_order }))
 }
 
 export function useItems(): UseItems {
@@ -173,5 +201,25 @@ export function useItems(): UseItems {
     if (error) setError(error.message)
   }, [])
 
-  return { items, error, create, update, setFlags, remove, flush }
+  const move = useCallback(
+    (dragId: string, targetId: string): void => {
+      const changes = reorder(items, dragId, targetId)
+      if (!changes.length) return
+      const order = Object.fromEntries(changes.map((c) => [c.id, c.sort_order]))
+      setItems((prev) =>
+        prev.map((item) => (item.id in order ? { ...item, sort_order: order[item.id] } : item))
+      )
+      void Promise.all(
+        changes.map((c) =>
+          supabase.from('items').update({ sort_order: c.sort_order }).eq('id', c.id)
+        )
+      ).then((results) => {
+        const failed = results.find((r) => r.error)
+        if (failed?.error) setError(failed.error.message)
+      })
+    },
+    [items]
+  )
+
+  return { items, error, create, update, setFlags, remove, move, flush }
 }

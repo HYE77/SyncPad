@@ -7,10 +7,11 @@ import { TextInput } from '../../components/TextInput'
 import { categoriesOf, nextFlags, sortItems, useItems, type SortKey } from './useItems'
 
 export function Items({ onOpenSettings }: { onOpenSettings: () => void }): React.JSX.Element {
-  const { items, error, create, update, setFlags, remove, flush } = useItems()
+  const { items, error, create, update, setFlags, remove, move, flush } = useItems()
   const [editingId, setEditingId] = useState<string | null>(null)
   const [query, setQuery] = useState('')
-  const [sort, setSort] = useState<SortKey>('newest')
+  const [sort, setSort] = useState<SortKey>('manual')
+  const [dragId, setDragId] = useState<string | null>(null)
   const [category, setCategory] = useState<string | null>(null)
   const categories = categoriesOf(items)
   // 고른 카테고리의 마지막 항목이 사라지면 탭도 사라진다. 빈 화면에 갇히지 않게 ALL로 돌린다.
@@ -53,9 +54,9 @@ export function Items({ onOpenSettings }: { onOpenSettings: () => void }): React
           aria-label="정렬 기준"
           className="bg-term-bg text-term-dim shrink-0 text-sm outline-none"
         >
+          <option value="manual">내 순서</option>
           <option value="newest">최신순</option>
           <option value="oldest">오래된순</option>
-          <option value="completed">완료여부</option>
         </select>
       </div>
 
@@ -77,6 +78,20 @@ export function Items({ onOpenSettings }: { onOpenSettings: () => void }): React
               key={item.id}
               item={item}
               editing={editingId === item.id}
+              // 순서는 sort_order로 저장되므로 '내 순서'일 때만 끌 수 있다.
+              draggable={sort === 'manual' && !q}
+              onDragStart={() => setDragId(item.id)}
+              onDragEnd={() => setDragId(null)}
+              // 같은 완료 그룹 안에서만 드롭을 받는다.
+              onDragOver={(e) => {
+                if (
+                  dragId &&
+                  dragId !== item.id &&
+                  items.find((i) => i.id === dragId)?.is_completed === item.is_completed
+                )
+                  e.preventDefault()
+              }}
+              onDrop={() => dragId && move(dragId, item.id)}
               onBlurRow={(e) => {
                 if (editingId !== item.id || e.currentTarget.contains(e.relatedTarget)) return
                 setEditingId(null)
