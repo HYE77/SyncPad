@@ -10,6 +10,8 @@ export function ItemRow({
   item,
   editing,
   draggable,
+  dragging,
+  onDragEnter,
   onDragStart,
   onDragEnd,
   onDragOver,
@@ -24,6 +26,8 @@ export function ItemRow({
   item: Item
   editing: boolean
   draggable: boolean
+  dragging: boolean
+  onDragEnter: () => void
   onDragStart: () => void
   onDragEnd: () => void
   onDragOver: (e: React.DragEvent<HTMLLIElement>) => void
@@ -43,9 +47,11 @@ export function ItemRow({
       draggable={draggable && !editing}
       onDragStart={onDragStart}
       onDragEnd={onDragEnd}
+      data-id={item.id}
+      onDragEnter={onDragEnter}
       onDragOver={onDragOver}
       onDrop={onDrop}
-      className="group flex items-start gap-2.5 border-b border-term-line px-4 py-2 hover:bg-white/5"
+      className={`group flex items-start gap-2.5 border-b border-term-line px-4 py-2 hover:bg-white/5 ${dragging ? 'opacity-40' : ''}`}
     >
       <button
         onClick={onToggleFlag}

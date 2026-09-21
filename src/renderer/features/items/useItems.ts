@@ -23,6 +23,8 @@ type UseItems = {
   setFlags: (id: string, flags: ItemFlags) => Promise<void>
   remove: (id: string) => Promise<void>
   move: (dragId: string, targetId: string) => void
+  commitOrder: () => void
+  cancelOrder: () => void
   flush: () => void
 }
 
@@ -201,25 +203,46 @@ export function useItems(): UseItems {
     if (error) setError(error.message)
   }, [])
 
+  // 드래그 중에는 화면에서만 실시간으로 옮기고(move), 놓았을 때 한 번에 저장한다(commitOrder).
+  // origin은 드래그 시작 시점의 sort_order라서 취소(cancelOrder) 때 되돌린다.
+  const origin = useRef<Record<string, number> | null>(null)
+
   const move = useCallback(
     (dragId: string, targetId: string): void => {
       const changes = reorder(items, dragId, targetId)
       if (!changes.length) return
+      origin.current ??= Object.fromEntries(items.map((item) => [item.id, item.sort_order]))
       const order = Object.fromEntries(changes.map((c) => [c.id, c.sort_order]))
       setItems((prev) =>
         prev.map((item) => (item.id in order ? { ...item, sort_order: order[item.id] } : item))
       )
-      void Promise.all(
-        changes.map((c) =>
-          supabase.from('items').update({ sort_order: c.sort_order }).eq('id', c.id)
-        )
-      ).then((results) => {
-        const failed = results.find((r) => r.error)
-        if (failed?.error) setError(failed.error.message)
-      })
     },
     [items]
   )
 
-  return { items, error, create, update, setFlags, remove, move, flush }
+  const commitOrder = useCallback((): void => {
+    const start = origin.current
+    origin.current = null
+    if (!start) return
+    const changed = items.filter((item) => start[item.id] !== item.sort_order)
+    void Promise.all(
+      changed.map((item) =>
+        supabase.from('items').update({ sort_order: item.sort_order }).eq('id', item.id)
+      )
+    ).then((results) => {
+      const failed = results.find((r) => r.error)
+      if (failed?.error) setError(failed.error.message)
+    })
+  }, [items])
+
+  const cancelOrder = useCallback((): void => {
+    const start = origin.current
+    origin.current = null
+    if (start)
+      setItems((prev) =>
+        prev.map((item) => (item.id in start ? { ...item, sort_order: start[item.id] } : item))
+      )
+  }, [])
+
+  return { items, error, create, update, setFlags, remove, move, commitOrder, cancelOrder, flush }
 }
