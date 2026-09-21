@@ -51,6 +51,8 @@ export function Items({ onOpenSettings }: { onOpenSettings: () => void }): React
   })
 
   async function addItem(): Promise<void> {
+    // 방금 만든 빈 항목이 아직 입력 중이면 또 만들지 않는다.
+    if (items.some((item) => item.id === editingId && !item.content.trim())) return
     const item = await create('', false, active)
     if (item) setEditingId(item.id)
   }
@@ -142,7 +144,12 @@ export function Items({ onOpenSettings }: { onOpenSettings: () => void }): React
           ))}
         </ul>
         {/* 목록 아래 남는 공간 전체가 클릭 영역이다. */}
-        <div onClick={() => void addItem()} aria-hidden className="min-h-8 flex-1" />
+        <div
+          onMouseDown={(e) => e.preventDefault()} // 입력 중인 행이 blur로 지워지지 않게 포커스를 지킨다.
+          onClick={() => void addItem()}
+          aria-hidden
+          className="min-h-8 flex-1"
+        />
       </div>
       <datalist id="syncpad-categories">
         {categories.map((name) => (
