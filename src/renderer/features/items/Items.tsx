@@ -15,6 +15,9 @@ export function Items({ onOpenSettings }: { onOpenSettings: () => void }): React
   const [dragId, setDragId] = useState<string | null>(null)
   const listRef = useRef<HTMLUListElement>(null)
   const tops = useRef<Record<string, number>>({})
+  const [showCompleted, setShowCompleted] = useState(
+    () => localStorage.getItem('syncpad.showCompleted') !== 'false'
+  )
   const [category, setCategory] = useState<string | null>(null)
   const categories = categoriesOf(items)
   // 고른 카테고리의 마지막 항목이 사라지면 탭도 사라진다. 빈 화면에 갇히지 않게 ALL로 돌린다.
@@ -24,6 +27,7 @@ export function Items({ onOpenSettings }: { onOpenSettings: () => void }): React
     items.filter(
       (item) =>
         (active === null || item.category === active) &&
+        (showCompleted || !item.is_completed) &&
         (!q || item.content.toLowerCase().includes(q))
     ),
     sort
@@ -80,7 +84,7 @@ export function Items({ onOpenSettings }: { onOpenSettings: () => void }): React
         </select>
       </div>
 
-      <div className="flex shrink-0 gap-2 overflow-x-auto border-b border-term-line px-4 py-2">
+      <div className="flex shrink-0 items-center gap-2 overflow-x-auto border-b border-term-line px-4 py-2">
         {[null, ...categories].map((name) => (
           <CategoryTab
             key={name ?? 'ALL'}
@@ -89,6 +93,16 @@ export function Items({ onOpenSettings }: { onOpenSettings: () => void }): React
             onClick={() => setCategory(name)}
           />
         ))}
+        <button
+          onClick={() => {
+            localStorage.setItem('syncpad.showCompleted', String(!showCompleted))
+            setShowCompleted(!showCompleted)
+          }}
+          aria-pressed={showCompleted}
+          className="text-term-dim hover:text-term-fg ml-auto shrink-0 text-xs"
+        >
+          {showCompleted ? '완료 숨기기' : '완료 보기'}
+        </button>
       </div>
 
       <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">
