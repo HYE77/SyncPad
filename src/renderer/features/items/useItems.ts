@@ -114,6 +114,10 @@ export function useItems(): UseItems {
   const pending = useRef<Record<string, string>>({})
   const timers = useRef<Record<string, ReturnType<typeof setTimeout>>>({})
 
+  // 낙관적으로 만든 행의 INSERT가 끝나기 전에 update/delete가 먼저 나가지 않게 기다린다.
+  const inserting = useRef<Record<string, PromiseLike<unknown>>>({})
+  const ready = (id: string): PromiseLike<unknown> | undefined => inserting.current[id]
+
   const load = useCallback(async (): Promise<void> => {
     const { data, error } = await supabase
       .from('items')
@@ -143,6 +147,7 @@ export function useItems(): UseItems {
     if (content === undefined) return
     delete pending.current[id]
     clearTimeout(timers.current[id])
+    await ready(id)
     const { error } = await supabase.from('items').update({ content }).eq('id', id)
     if (error) setError(error.message)
   }, [])
@@ -156,24 +161,36 @@ export function useItems(): UseItems {
 
   const create = useCallback(
     async (content = '', isTask = false, category: string | null = null): Promise<Item | null> => {
+      // getUser()는 서버 왕복이라 느리다. 로컬 세션에서 읽고, 행은 먼저 화면에 넣은 뒤 저장한다.
       const {
-        data: { user }
-      } = await supabase.auth.getUser()
-      if (!user) {
+        data: { session }
+      } = await supabase.auth.getSession()
+      if (!session) {
         setError('세션이 없다. 로그인이 필요하다.')
         return null
       }
-      const { data, error } = await supabase
-        .from('items')
-        .insert({ user_id: user.id, content, is_task: isTask, category })
-        .select()
-        .single()
-      if (error) {
-        setError(error.message)
-        return null
+      const now = new Date().toISOString()
+      const item: Item = {
+        id: crypto.randomUUID(),
+        content,
+        is_task: isTask,
+        is_completed: false,
+        category,
+        sort_order: 0,
+        created_at: now,
+        updated_at: now
       }
-      setItems((prev) => [data, ...prev])
-      return data
+      setItems((prev) => [item, ...prev])
+      inserting.current[item.id] = supabase
+        .from('items')
+        .insert({ id: item.id, user_id: session.user.id, content, is_task: isTask, category })
+        .then(({ error }) => {
+          delete inserting.current[item.id]
+          if (!error) return
+          setError(error.message)
+          setItems((prev) => prev.filter((i) => i.id !== item.id))
+        })
+      return item
     },
     []
   )
@@ -191,6 +208,7 @@ export function useItems(): UseItems {
   // 체크박스는 디바운스하지 않는다. 클릭은 타이핑처럼 연달아 오지 않는다.
   const setFlags = useCallback(async (id: string, flags: ItemFlags): Promise<void> => {
     setItems((prev) => prev.map((item) => (item.id === id ? { ...item, ...flags } : item)))
+    await ready(id)
     const { error } = await supabase.from('items').update(flags).eq('id', id)
     if (error) setError(error.message)
   }, [])
@@ -199,6 +217,7 @@ export function useItems(): UseItems {
     delete pending.current[id]
     clearTimeout(timers.current[id])
     setItems((prev) => prev.filter((item) => item.id !== id))
+    await ready(id)
     const { error } = await supabase.from('items').delete().eq('id', id)
     if (error) setError(error.message)
   }, [])

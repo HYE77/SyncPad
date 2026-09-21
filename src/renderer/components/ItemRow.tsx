@@ -67,6 +67,12 @@ export function ItemRow({
           // 리렌더마다 끊겨 커서가 튄다.
           defaultValue={item.content}
           onChange={(e) => onChangeContent(e.target.value)}
+          // Enter는 작성 완료, 줄바꿈은 Shift+Enter. 한글 조합 중 Enter는 글자 확정이라 건드리지 않는다.
+          onKeyDown={(e) => {
+            if (e.key !== 'Enter' || e.shiftKey || e.nativeEvent.isComposing) return
+            e.preventDefault()
+            e.currentTarget.blur()
+          }}
           aria-label="항목 내용"
           // field-sizing으로 내용만큼만 늘린다. 높이 계산용 JS가 필요 없다.
           className="min-w-0 flex-1 resize-none bg-transparent py-0.5 text-sm break-words outline-none select-text [field-sizing:content]"
