@@ -9,6 +9,13 @@ function marker(item: Item): string {
 export function ItemRow({
   item,
   editing,
+  draggable,
+  dragging,
+  onDragEnter,
+  onDragStart,
+  onDragEnd,
+  onDragOver,
+  onDrop,
   onBlurRow,
   onToggleFlag,
   onStartEdit,
@@ -18,6 +25,13 @@ export function ItemRow({
 }: {
   item: Item
   editing: boolean
+  draggable: boolean
+  dragging: boolean
+  onDragEnter: () => void
+  onDragStart: () => void
+  onDragEnd: () => void
+  onDragOver: (e: React.DragEvent<HTMLLIElement>) => void
+  onDrop: () => void
   onBlurRow: (e: React.FocusEvent<HTMLLIElement>) => void
   onToggleFlag: () => void
   onStartEdit: () => void
@@ -29,7 +43,15 @@ export function ItemRow({
     <li
       // textarea에 걸면 카테고리 입력을 누르는 순간 편집이 닫힌다. 행 밖으로 나갈 때만 닫는다.
       onBlur={onBlurRow}
-      className="group flex items-start gap-2.5 border-b border-term-line px-4 py-2 hover:bg-white/5"
+      // 편집 중에는 textarea 드래그 선택과 겹치므로 끄지 않으면 텍스트 선택이 안 된다.
+      draggable={draggable && !editing}
+      onDragStart={onDragStart}
+      onDragEnd={onDragEnd}
+      data-id={item.id}
+      onDragEnter={onDragEnter}
+      onDragOver={onDragOver}
+      onDrop={onDrop}
+      className={`group flex items-start gap-2.5 border-b border-term-line px-4 py-2 hover:bg-white/5 ${dragging ? 'opacity-40' : ''}`}
     >
       <button
         onClick={onToggleFlag}
