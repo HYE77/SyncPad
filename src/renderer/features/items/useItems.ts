@@ -65,6 +65,22 @@ export function categoriesOf(items: Item[]): string[] {
   return [...new Set(names)].sort((a, b) => a.localeCompare(b))
 }
 
+// 상단 탭(null = ALL), 완료 숨김, 검색어(대소문자 무시)를 한 번에 건다.
+export function filterItems(
+  items: Item[],
+  category: string | null,
+  showCompleted: boolean,
+  query: string
+): Item[] {
+  const q = query.trim().toLowerCase()
+  return items.filter(
+    (item) =>
+      (category === null || item.category === category) &&
+      (showCompleted || !item.is_completed) &&
+      (!q || item.content.toLowerCase().includes(q))
+  )
+}
+
 export type SortKey = 'manual' | 'newest' | 'oldest'
 
 const newestFirst = (a: Item, b: Item): number =>
