@@ -4,7 +4,7 @@ import { Button } from '../../components/Button'
 import { CategoryTab } from '../../components/CategoryTab'
 import { ItemRow } from '../../components/ItemRow'
 import { TextInput } from '../../components/TextInput'
-import { categoriesOf, nextFlags, sortItems, useItems, type SortKey } from './useItems'
+import { categoriesOf, filterItems, nextFlags, sortItems, useItems, type SortKey } from './useItems'
 
 export function Items({ onOpenSettings }: { onOpenSettings: () => void }): React.JSX.Element {
   const { items, error, create, update, setFlags, remove, move, commitOrder, cancelOrder, flush } =
@@ -22,16 +22,7 @@ export function Items({ onOpenSettings }: { onOpenSettings: () => void }): React
   const categories = categoriesOf(items)
   // 고른 카테고리의 마지막 항목이 사라지면 탭도 사라진다. 빈 화면에 갇히지 않게 ALL로 돌린다.
   const active = category && categories.includes(category) ? category : null
-  const q = query.trim().toLowerCase()
-  const visible = sortItems(
-    items.filter(
-      (item) =>
-        (active === null || item.category === active) &&
-        (showCompleted || !item.is_completed) &&
-        (!q || item.content.toLowerCase().includes(q))
-    ),
-    sort
-  )
+  const visible = sortItems(filterItems(items, active, showCompleted, query), sort)
 
   // 행 위치가 바뀌면(드래그 재정렬, 완료로 내려감) 이전 자리에서 새 자리로 미끄러지게 한다 (FLIP).
   useLayoutEffect(() => {
@@ -115,7 +106,7 @@ export function Items({ onOpenSettings }: { onOpenSettings: () => void }): React
               item={item}
               editing={editingId === item.id}
               // 순서는 sort_order로 저장되므로 '내 순서'일 때만 끌 수 있다.
-              draggable={sort === 'manual' && !q}
+              draggable={sort === 'manual' && !query.trim()}
               dragging={dragId === item.id}
               onDragStart={() => setDragId(item.id)}
               onDragEnd={() => {

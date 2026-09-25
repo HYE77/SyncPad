@@ -1,6 +1,14 @@
 import { expect, test, vi } from 'vitest'
 import type { RealtimePostgresChangesPayload } from '@supabase/supabase-js'
-import { applyChange, categoriesOf, nextFlags, reorder, sortItems, type Item } from './useItems'
+import {
+  applyChange,
+  categoriesOf,
+  filterItems,
+  nextFlags,
+  reorder,
+  sortItems,
+  type Item
+} from './useItems'
 
 // applyChange는 순수 함수인데 모듈이 supabase client를 끌고 온다. .env 없이 돌게 막아둔다.
 vi.mock('../../lib/supabase', () => ({ supabase: {} }))
@@ -139,4 +147,17 @@ test('마커는 평문 → 할일 → 완료 → 평문으로 순환한다', () 
     it = { ...it, ...nextFlags(it) }
     expect({ is_task: it.is_task, is_completed: it.is_completed }).toEqual(expected)
   }
+})
+
+test('filterItems는 탭·완료숨김·검색어를 모두 만족하는 항목만 남긴다', () => {
+  const 일 = { ...item('a', '회의 준비'), category: '일' }
+  const 일완료 = { ...item('b', '회의록 정리'), category: '일', is_completed: true }
+  const 개인 = { ...item('c', '장보기'), category: '개인' }
+  const all = [일, 일완료, 개인]
+
+  expect(filterItems(all, null, true, '')).toEqual(all) // ALL 탭
+  expect(filterItems(all, '일', true, '')).toEqual([일, 일완료])
+  expect(filterItems(all, '일', false, '')).toEqual([일])
+  expect(filterItems(all, null, true, '  회의록 ')).toEqual([일완료]) // 앞뒤 공백 무시
+  expect(filterItems([{ ...일, content: 'Meeting' }], null, true, 'meet')).toHaveLength(1) // 대소문자 무시
 })

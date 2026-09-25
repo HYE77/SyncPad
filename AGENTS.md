@@ -58,10 +58,10 @@ src/
 - Format: `npm run format` (Prettier)
 - Lint: `npm run lint` (ESLint)
 - Typecheck: `npm run typecheck` (main/preload + renderer 분리)
-- Test: 아직 없음. 첫 테스트를 쓸 때 Vitest를 붙인다.
+- Test: `npm test` (Vitest). 순수 로직만 단위 테스트한다. RLS는 `supabase/rls-check.sql`로 확인한다.
 - Build: `npm run build` → `npm run build:mac` / `build:win` (electron-builder → .dmg / .exe)
 
-CI는 format·lint·typecheck·build를 PR과 main push에서 실행한다.
+CI는 format·lint·typecheck·test·build를 PR과 main push에서 실행한다.
 
 ## 6. Git / PR 규칙
 
