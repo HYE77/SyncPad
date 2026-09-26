@@ -1,4 +1,4 @@
-<p align="center"><img src="resources/icon.png" alt="SyncPad 아이콘" width="128"></p>
+<p align="center"><img src="docs/images/banner.png" alt="SyncPad" width="100%"></p>
 
 # SyncPad
 
