@@ -1,6 +1,6 @@
 # SyncPad
 
-Mac/Windows 크로스 플랫폼 메모·할일 앱입니다. 터미널 감성 UI에 계정 기반 실시간 동기화를 더했습니다. (Electron + React + Supabase)
+Mac/Windows 크로스 플랫폼 메모·ToDo 앱입니다. 터미널 감성 UI에 계정 기반 실시간 동기화를 더했습니다. (Electron + React + Supabase)
 
 [![다운로드](https://img.shields.io/github/v/release/HYE77/SyncPad?label=%EB%8B%A4%EC%9A%B4%EB%A1%9C%EB%93%9C&style=for-the-badge)](https://github.com/HYE77/SyncPad/releases/latest)
 
@@ -42,7 +42,7 @@ SyncPad는 유료 코드 서명을 하지 않은 무료 앱이라 처음 실행�
 1. 받은 `.dmg`를 열고 SyncPad 아이콘을 Applications 폴더로 끌어다 놓습니다.
 2. SyncPad를 처음 열면 아래 경고가 뜹니다. Apple 유료 인증서로 서명하지 않은 앱이라 나오는 메시지입니다. **완료**를 누릅니다(휴지통으로 이동 X).
 
-   <img src="docs/images/macos-blocked.png" alt="macOS 열지 않음 경고" width="262">
+   <img src="docs/images/macos-blocked.png" alt="macOS 열지 않음 경고" width="260">
 
 3. 화면 왼쪽 위 Apple 메뉴 → **시스템 설정** → **개인정보 보호 및 보안**을 열고 맨 아래 "보안"까지 내립니다. "SyncPad을(를) 차단했습니다" 옆의 **그래도 열기**를 누릅니다.
 
