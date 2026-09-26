@@ -3,6 +3,7 @@
 # SyncPad
 
 Mac/Windows 크로스 플랫폼 메모·ToDo 앱입니다.
+
 터미널 감성 UI에 계정 기반 실시간 동기화를 더했습니다.
 
 [![다운로드](https://img.shields.io/github/v/release/HYE77/SyncPad?label=%EB%8B%A4%EC%9A%B4%EB%A1%9C%EB%93%9C&style=for-the-badge)](https://github.com/HYE77/SyncPad/releases/latest)
