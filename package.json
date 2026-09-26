@@ -1,7 +1,7 @@
 {
   "name": "syncpad",
   "version": "1.0.0",
-  "description": "Mac/Windows 크로스 플랫폼 메모·할일 앱",
+  "description": "Mac/Windows 크로스 플랫폼 메모·ToDo 앱",
   "main": "./out/main/index.js",
   "author": "HYE77",
   "homepage": "https://github.com/HYE77/SyncPad",
