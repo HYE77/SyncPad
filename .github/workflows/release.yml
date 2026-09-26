@@ -12,12 +12,16 @@ permissions:
 jobs:
   release:
     strategy:
+      # 한 OS가 실패해도 다른 OS 잡은 끝까지 올린다.
+      fail-fast: false
       matrix:
         include:
           - os: macos-latest
             script: build:mac
+            asset: dist/*.dmg
           - os: windows-latest
             script: build:win
+            asset: dist/*-setup.exe
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v5
@@ -34,7 +38,11 @@ jobs:
       - name: Upload to release
         shell: bash
         run: |
-          gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1 || gh release create "$GITHUB_REF_NAME" --generate-notes
-          gh release upload "$GITHUB_REF_NAME" dist/*.dmg dist/*-setup.exe --clobber
+          # 두 잡이 동시에 create할 수 있어 진 쪽은 다시 view로 확인한다.
+          gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1 \
+            || gh release create "$GITHUB_REF_NAME" --generate-notes \
+            || gh release view "$GITHUB_REF_NAME" >/dev/null
+          # 러너마다 자기 OS 산출물만 올린다. 매칭이 없으면 gh가 실패한다.
+          gh release upload "$GITHUB_REF_NAME" ${{ matrix.asset }} --clobber
         env:
           GH_TOKEN: ${{ github.token }}
