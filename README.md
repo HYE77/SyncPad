@@ -10,7 +10,7 @@ Mac/Windows 크로스 플랫폼 메모·ToDo 앱입니다. 터미널 감성 UI�
 | :-----------------------------------: | :----------------------------------: |
 | ![로그인 화면](docs/images/login.png) | ![트레이 팝업](docs/images/tray.png) |
 
-**목차** — 사용자: [주요 기능](#주요-기능) · [설치](#설치) · [사용법](#사용법) · [데이터 저장 위치](#데이터-저장-위치) · [문제 해결](#문제-해결) / 개발자: [로컬에서 실행하기](#로컬에서-실행하기) · [기술 스택](#기술-스택) · [릴리스](#릴리스-관리자용)
+**목차** — [주요 기능](#주요-기능) · [설치](#설치) · [사용법](#사용법) · [데이터 저장 위치](#데이터-저장-위치) · [문제 해결](#문제-해결) · [기술 스택](#기술-스택)
 
 ## 주요 기능
 
@@ -83,50 +83,6 @@ SyncPad는 유료 코드 서명을 하지 않은 무료 앱이라 처음 실행�
 - **macOS 시스템 설정에 "그래도 열기"가 없습니다** — SyncPad를 한 번 열어 경고를 띄운 뒤 **완료**를 누르고 다시 확인합니다. 그래도 안 되면 터미널에서 `xattr -cr /Applications/SyncPad.app`을 실행한 뒤 엽니다.
 - 그 밖의 문제는 [Issues](https://github.com/HYE77/SyncPad/issues)에 남겨 주세요.
 
-# 개발자용
-
-## 로컬에서 실행하기
-
-필요한 것: Node.js 24, [Supabase](https://supabase.com) 프로젝트 하나.
-
-1. 의존성을 설치합니다.
-
-   ```bash
-   npm ci
-   ```
-
-2. Supabase를 준비합니다.
-   - 프로젝트를 만들고 SQL Editor에서 [`supabase/schema.sql`](supabase/schema.sql)을 실행합니다.
-   - Authentication에서 Email 로그인을 켭니다. Google 로그인을 쓰려면 Google provider를 켜고 Redirect URL에 `syncpad://auth/callback`을 추가합니다.
-
-3. 환경 변수 — `.env.example`을 `.env`로 복사하고 프로젝트 Settings → API의 값을 채웁니다.
-
-   ```bash
-   cp .env.example .env
-   ```
-
-   ```
-   VITE_SUPABASE_URL=https://<project>.supabase.co
-   VITE_SUPABASE_ANON_KEY=<anon key>
-   ```
-
-   anon key만 사용합니다. service role key는 넣지 않습니다.
-
-4. 실행합니다.
-
-   ```bash
-   npm run dev
-   ```
-
-### 명령어
-
-| 명령                                      | 설명                                  |
-| ----------------------------------------- | ------------------------------------- |
-| `npm run dev`                             | 개발 모드 실행                        |
-| `npm run build:mac` / `npm run build:win` | 설치 파일 빌드 (`dist/`, `.env` 필요) |
-| `npm run lint` / `npm run typecheck`      | 린트 / 타입 검사                      |
-| `npm test`                                | Vitest                                |
-
 ## 기술 스택
 
 - Desktop: Electron, electron-vite, electron-builder
@@ -134,8 +90,4 @@ SyncPad는 유료 코드 서명을 하지 않은 무료 앱이라 처음 실행�
 - Backend: Supabase (Postgres, Auth, Realtime) — 인가는 RLS로 처리하며 별도 API 서버는 없습니다
 - Test/Lint: Vitest, ESLint, Prettier
 
-## 릴리스 (관리자용)
-
-1. `package.json`의 `version`을 올리고 커밋합니다.
-2. `git tag vX.Y.Z && git push origin vX.Y.Z` — `release.yml`이 mac/win을 빌드해 Release에 올립니다.
-3. 사전 준비: 저장소 Secrets에 `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`를 등록합니다.
+개발·기여 관련 문서는 [CONTRIBUTING.md](CONTRIBUTING.md)를 참고하세요.
