@@ -29,7 +29,7 @@ Mac/Windows 크로스 플랫폼 메모·할일 앱. 터미널 감성 UI에 계�
 | macOS   | 12 Monterey 이상        | Apple Silicon(M1 이후): `syncpad-<버전>-arm64.dmg`<br>Intel: `syncpad-<버전>-x64.dmg` |
 | Windows | Windows 10, 11 (64비트) | `syncpad-<버전>-setup.exe`                                                            |
 
-내 Mac이 어느 쪽인지는 메뉴 → 이 Mac에 관하여 → "칩"(Apple M…이면 Apple Silicon) 또는 "프로세서"(Intel)로 확인한다.
+내 Mac이 어느 쪽인지는 화면 왼쪽 위 Apple 메뉴 → 이 Mac에 관하여 → "칩"(Apple M…이면 Apple Silicon) 또는 "프로세서"(Intel)로 확인한다.
 
 ## 설치
 
@@ -40,19 +40,17 @@ SyncPad는 코드 서명을 하지 않은 무료 앱이라 처음 실행할 때 
 ### macOS
 
 1. 받은 `.dmg`를 열고 SyncPad 아이콘을 Applications 폴더로 끌어다 놓는다.
-2. 처음 열면 아래처럼 **"손상되었기 때문에 열 수 없습니다"** 창이 뜬다. 파일이 실제로 손상된 것이 아니라 서명이 없어서 나오는 메시지다. **취소**를 누른다(휴지통으로 이동 X).
+2. SyncPad를 처음 열면 아래 경고가 뜬다. Apple 유료 인증서로 서명하지 않은 앱이라 나오는 메시지다. **완료**를 누른다(휴지통으로 이동 X).
 
-   <img src="docs/images/macos-damaged.png" alt="macOS 손상 경고" width="262">
+   <img src="docs/images/macos-blocked.png" alt="macOS 열지 않음 경고" width="262">
 
-3. 터미널(Spotlight에서 "터미널" 검색)을 열고 아래 한 줄을 붙여 넣은 뒤 Enter.
+3. 화면 왼쪽 위 Apple 메뉴 → **시스템 설정** → **개인정보 보호 및 보안**을 열고 맨 아래 "보안"까지 내린다. "SyncPad을(를) 차단했습니다" 옆의 **그래도 열기**를 누른다.
 
-   ```bash
-   xattr -cr /Applications/SyncPad.app
-   ```
+   <img src="docs/images/macos-open-anyway.png" alt="시스템 설정 그래도 열기" width="470">
 
-4. 다시 SyncPad를 연다. 이제 경고 없이 열린다.
+4. 한 번 더 뜨는 확인 창에서 **그래도 열기**를 누르고 Mac 암호(또는 Touch ID)를 입력한다. 이후로는 경고 없이 열린다.
 
-> 우클릭 → 열기, 시스템 설정의 "그래도 열기"는 이 경고에는 통하지 않는다. 3번 명령만 된다.
+> "그래도 열기" 버튼은 2번 경고를 본 뒤 약 1시간 동안만 보인다. 없으면 SyncPad를 다시 한 번 열어 2번부터 반복한다.
 
 ### Windows
 
@@ -82,7 +80,7 @@ SyncPad는 코드 서명을 하지 않은 무료 앱이라 처음 실행할 때 
 - **가입했는데 로그인이 안 된다** — 가입 메일함(스팸함 포함)에 인증 메일이 왔다면 링크를 먼저 누른다. 비밀번호는 6자 이상이어야 한다.
 - **Google 로그인 후 앱으로 돌아오지 않는다** — 브라우저의 "SyncPad 열기" 확인 창을 허용했는지 본다. 막혔다면 앱을 껐다 켜고 다시 시도한다.
 - **다른 기기에 반영이 안 되거나 늦다** — 두 기기가 같은 계정으로 로그인했는지, 인터넷이 연결돼 있는지 확인한다. 연결이 돌아오면 자동으로 다시 불러오고, 그래도 안 되면 앱을 재시작한다.
-- **macOS에서 "손상되었기 때문에…"가 계속 뜬다** — [설치 3번](#macos) 명령을 앱을 Applications로 옮긴 **뒤에** 실행했는지 확인한다.
+- **macOS 시스템 설정에 "그래도 열기"가 없다** — SyncPad를 한 번 열어 경고를 띄운 뒤 **완료**를 누르고 다시 확인한다. 그래도 안 되면 터미널에서 `xattr -cr /Applications/SyncPad.app` 실행 후 연다.
 - 그 밖의 문제는 [Issues](https://github.com/HYE77/SyncPad/issues)에 남긴다.
 
 # 개발자용
