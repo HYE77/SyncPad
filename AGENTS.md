@@ -5,7 +5,7 @@ Notion Development Convention 전체를 복제하지 않고, 이 프로젝트에
 
 ## 1. 프로젝트 목적과 범위
 
-- Mac/Windows 크로스 플랫폼 메모·할일 앱
+- Mac/Windows 크로스 플랫폼 메모·ToDo 앱
 - 터미널 감성의 심플한 UI, 계정 기반 기기 간 실시간 동기화
 - MVP 범위:
   - 메모/할일 통합 아이템 (체크박스 옵션)
