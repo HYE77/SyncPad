@@ -5,7 +5,10 @@ import tailwindcss from '@tailwindcss/vite'
 
 export default defineConfig({
   main: {},
-  preload: {},
+  // sandbox: true인 preload는 node_modules를 require하지 못한다. 의존성을 번들에 포함시킨다 (#78).
+  preload: {
+    build: { externalizeDeps: false }
+  },
   renderer: {
     resolve: {
       alias: {
