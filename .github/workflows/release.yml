@@ -30,6 +30,15 @@ jobs:
           node-version: 24
           cache: npm
       - run: npm ci
+      # 잘못된 Secret(따옴표·스킴 누락 등)은 빌드는 통과하고 실행 시 검은 화면으로 죽는다 (#78). 값은 출력하지 않는다.
+      - name: Check Supabase secrets
+        shell: bash
+        run: |
+          [[ "$VITE_SUPABASE_URL" =~ ^https://[^[:space:]\"\']+$ ]] || { echo "::error::VITE_SUPABASE_URL이 https:// URL이 아니다"; exit 1; }
+          [[ -n "$VITE_SUPABASE_ANON_KEY" ]] || { echo "::error::VITE_SUPABASE_ANON_KEY가 비어 있다"; exit 1; }
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
       # Vite가 빌드 시점에 renderer 번들로 인라인한다. anon key는 공개 키다.
       - run: npm run ${{ matrix.script }} -- --publish never
         env:
