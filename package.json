@@ -1,6 +1,6 @@
 {
   "name": "syncpad",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Mac/Windows 크로스 플랫폼 메모·ToDo 앱",
   "main": "./out/main/index.js",
   "author": "HYE77",
