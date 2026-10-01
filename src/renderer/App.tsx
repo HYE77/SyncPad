@@ -16,7 +16,7 @@ export function App(): React.JSX.Element | null {
       <div className={isSettings ? 'hidden' : ''}>
         <Items onOpenSettings={() => setIsSettings(true)} />
       </div>
-      {isSettings && <Settings onClose={() => setIsSettings(false)} />}
+      {isSettings && <Settings user={session.user} onClose={() => setIsSettings(false)} />}
     </>
   )
 }
