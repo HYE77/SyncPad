@@ -1,22 +1,24 @@
 import { useState } from 'react'
-import type { User } from '@supabase/supabase-js'
+import type { Session } from '@supabase/supabase-js'
 import { Button } from '../../components/Button'
 import { GoogleLogo } from '../../components/GoogleLogo'
 import { supabase } from '../../lib/supabase'
 import { ACCENTS, loadAccent, saveAccent } from './accent'
+import { Devices } from './Devices'
 
 function formatDate(iso: string | undefined): string {
   return iso ? new Date(iso).toLocaleDateString('ko-KR') : '-'
 }
 
 export function Settings({
-  user,
+  session,
   onClose
 }: {
-  user: User
+  session: Session
   onClose: () => void
 }): React.JSX.Element {
   const [accent, setAccent] = useState(loadAccent)
+  const { user } = session
   const isGoogle = user.app_metadata.provider === 'google'
   // Google은 이름을 주고, 이메일 가입은 이름이 없어 이메일 앞부분을 쓴다.
   const displayName: string = user.user_metadata.full_name ?? user.email?.split('@')[0] ?? ''
@@ -62,6 +64,7 @@ export function Settings({
           </div>
         </div>
       </section>
+      <Devices accessToken={session.access_token} />
       <section className="p-4">
         <h2 className="mb-3 text-sm text-term-dim">하이라이트 컬러</h2>
         <div className="flex gap-3">

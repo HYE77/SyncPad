@@ -11,6 +11,10 @@ insert into auth.users (id) values
 insert into public.items (user_id, content) values
   ('00000000-0000-0000-0000-00000000000a', 'A의 메모'),
   ('00000000-0000-0000-0000-00000000000b', 'B의 메모');
+-- my_sessions() 확인용 (#92). A 세션 1개, B 세션 1개.
+insert into auth.sessions (id, user_id, created_at, updated_at) values
+  ('00000000-0000-0000-0000-0000000000a1', '00000000-0000-0000-0000-00000000000a', now(), now()),
+  ('00000000-0000-0000-0000-0000000000b1', '00000000-0000-0000-0000-00000000000b', now(), now());
 
 set local role authenticated;
 set local request.jwt.claims = '{"sub": "00000000-0000-0000-0000-00000000000a", "role": "authenticated"}';
@@ -40,6 +44,21 @@ begin
   raise exception 'update: A가 자기 행을 B에게 넘겼다';
 exception
   when insufficient_privilege then raise notice 'RLS OK';
+end $$;
+
+-- my_sessions()는 security definer라 RLS가 아니라 함수 안 where 절이 막는다.
+do $$
+declare n int;
+begin
+  select count(*) into n from public.my_sessions() s
+    where s.id <> '00000000-0000-0000-0000-0000000000a1';
+  if n <> 0 then raise exception 'my_sessions: A가 남의 세션 %개를 본다', n; end if;
+  select count(*) into n from public.my_sessions();
+  if n <> 1 then raise exception 'my_sessions: A가 자기 세션을 못 본다'; end if;
+  if has_function_privilege('anon', 'public.my_sessions()', 'execute') then
+    raise exception 'my_sessions: anon이 실행할 수 있다';
+  end if;
+  raise notice 'my_sessions OK';
 end $$;
 
 rollback;
