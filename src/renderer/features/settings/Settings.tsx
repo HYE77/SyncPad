@@ -1,8 +1,15 @@
 import { useState } from 'react'
+import type { User } from '@supabase/supabase-js'
 import { Button } from '../../components/Button'
 import { ACCENTS, loadAccent, saveAccent } from './accent'
 
-export function Settings({ onClose }: { onClose: () => void }): React.JSX.Element {
+export function Settings({
+  user,
+  onClose
+}: {
+  user: User
+  onClose: () => void
+}): React.JSX.Element {
   const [accent, setAccent] = useState(loadAccent)
 
   return (
@@ -13,6 +20,13 @@ export function Settings({ onClose }: { onClose: () => void }): React.JSX.Elemen
           닫기
         </Button>
       </header>
+      <section className="p-4">
+        <h2 className="mb-3 text-sm text-term-dim">계정</h2>
+        <p className="text-sm">{user.email}</p>
+        <p className="text-sm text-term-dim">
+          {user.app_metadata.provider === 'google' ? 'Google' : '이메일'} 로그인
+        </p>
+      </section>
       <section className="p-4">
         <h2 className="mb-3 text-sm text-term-dim">하이라이트 컬러</h2>
         <div className="flex gap-3">
