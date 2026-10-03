@@ -35,3 +35,19 @@ create trigger items_touch_updated_at before update on public.items
 -- Realtime이 items 변경을 흘려보내게 publication에 등록한다 (#6).
 -- 행 필터는 위 RLS 정책이 그대로 해준다.
 alter publication supabase_realtime add table public.items;
+
+-- 로그인된 기기 목록 (#92). auth 스키마는 API로 노출되지 않아 함수로 본인 세션만 꺼내 준다.
+-- security definer라 RLS 대신 where 절의 auth.uid()가 인가를 맡는다. search_path를 비워 하이재킹을 막는다.
+-- 기존 DB: 이 파일 전체가 아니라 이 블록(create ~ grant)만 SQL Editor에서 실행한다.
+create function public.my_sessions()
+returns table (id uuid, user_agent text, created_at timestamptz, last_active_at timestamptz)
+language sql stable security definer set search_path = ''
+as $$
+  select s.id, s.user_agent, s.created_at, s.updated_at
+  from auth.sessions s
+  where s.user_id = auth.uid()
+  order by s.updated_at desc
+$$;
+
+revoke execute on function public.my_sessions() from public, anon;
+grant execute on function public.my_sessions() to authenticated;
