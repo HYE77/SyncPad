@@ -1,10 +1,21 @@
-import { useLayoutEffect, useRef, useState } from 'react'
+import { Fragment, useLayoutEffect, useRef, useState } from 'react'
 import { supabase } from '../../lib/supabase'
 import { Button } from '../../components/Button'
 import { CategoryTab } from '../../components/CategoryTab'
 import { ItemRow } from '../../components/ItemRow'
 import { TextInput } from '../../components/TextInput'
 import { categoriesOf, filterItems, nextFlags, sortItems, useItems, type SortKey } from './useItems'
+
+// README "사용법" 표를 앱 안에 맞게 줄인 것. README를 고치면 여기도 맞춘다.
+const HELP = [
+  ['새 항목', '+ 새 항목, 또는 목록 아래 빈 곳 클릭'],
+  ['수정', '줄을 클릭'],
+  ['메모 ↔ 할일', '줄 앞 마커 클릭: * 메모 → [ ] 할일 → [x] 완료'],
+  ['순서 바꾸기', '"내 순서" 정렬에서 줄을 끌어다 놓기'],
+  ['동기화', '다른 기기에서 같은 계정으로 로그인하면 자동'],
+  ['퀵 액세스', '메뉴바(Windows는 트레이) 아이콘 클릭'],
+  ['완전히 종료', '메뉴바/트레이 아이콘 우클릭 → 종료']
+]
 
 export function Items({ onOpenSettings }: { onOpenSettings: () => void }): React.JSX.Element {
   const { items, error, create, update, setFlags, remove, move, commitOrder, cancelOrder, flush } =
@@ -155,6 +166,30 @@ export function Items({ onOpenSettings }: { onOpenSettings: () => void }): React
         <Button onClick={() => void supabase.auth.signOut()} className="px-3 py-2">
           로그아웃
         </Button>
+        {/* 네이티브 popover라 바깥 클릭·Esc 닫기를 브라우저가 처리한다. */}
+        <Button
+          popoverTarget="help"
+          aria-label="사용법"
+          title="사용법"
+          className="ml-auto px-3 py-2"
+        >
+          ?
+        </Button>
+      </div>
+      <div
+        id="help"
+        popover="auto"
+        className="border-term-line bg-term-surface text-term-fg m-auto rounded border p-4 text-xs backdrop:bg-black/50"
+      >
+        <h2 className="text-term-dim mb-3 text-sm">사용법</h2>
+        <dl className="grid grid-cols-[auto_1fr] gap-x-6 gap-y-1.5">
+          {HELP.map(([what, how]) => (
+            <Fragment key={what}>
+              <dt className="text-term-faint">{what}</dt>
+              <dd>{how}</dd>
+            </Fragment>
+          ))}
+        </dl>
       </div>
 
       {error && (
