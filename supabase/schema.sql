@@ -38,6 +38,7 @@ alter publication supabase_realtime add table public.items;
 
 -- 로그인된 기기 목록 (#92). auth 스키마는 API로 노출되지 않아 함수로 본인 세션만 꺼내 준다.
 -- security definer라 RLS 대신 where 절의 auth.uid()가 인가를 맡는다. search_path를 비워 하이재킹을 막는다.
+-- 기존 DB: 이 파일 전체가 아니라 이 블록(create ~ grant)만 SQL Editor에서 실행한다.
 create function public.my_sessions()
 returns table (id uuid, user_agent text, created_at timestamptz, last_active_at timestamptz)
 language sql stable security definer set search_path = ''
