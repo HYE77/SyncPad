@@ -19,6 +19,8 @@ function createWindow(): void {
     height: 670,
     show: false,
     autoHideMenuBar: true,
+    // 기본값은 흰색이라 크기 조절 중 렌더러가 다시 그리기 전에 흰 바탕이 비친다. --color-term-bg와 맞춘다.
+    backgroundColor: '#090e12',
     ...(process.platform === 'linux' ? { icon } : {}),
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
