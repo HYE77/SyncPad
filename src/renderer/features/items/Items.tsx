@@ -160,20 +160,16 @@ export function Items({ onOpenSettings }: { onOpenSettings: () => void }): React
       </datalist>
 
       <div className="border-term-line text-term-faint flex shrink-0 border-t">
-        <Button onClick={onOpenSettings} className="px-3 py-2">
-          설정
+        {/* 네이티브 popover라 바깥 클릭·Esc 닫기를 브라우저가 처리한다. */}
+        <Button popoverTarget="help" aria-label="사용법" title="사용법" className="px-3 py-2">
+          ?
         </Button>
-        <Button onClick={() => void supabase.auth.signOut()} className="px-3 py-2">
+        <Button onClick={() => void supabase.auth.signOut()} className="ml-auto px-3 py-2">
           로그아웃
         </Button>
-        {/* 네이티브 popover라 바깥 클릭·Esc 닫기를 브라우저가 처리한다. */}
-        <Button
-          popoverTarget="help"
-          aria-label="사용법"
-          title="사용법"
-          className="ml-auto px-3 py-2"
-        >
-          ?
+        {/* FE0E: 이모지가 아닌 텍스트 글리프로 그려 터미널 톤을 유지한다. */}
+        <Button onClick={onOpenSettings} aria-label="설정" title="설정" className="px-3 py-2">
+          {'⚙︎'}
         </Button>
       </div>
       <div
