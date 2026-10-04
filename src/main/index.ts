@@ -3,6 +3,7 @@ import { join, resolve } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 import { createTray } from './tray'
+import { checkForUpdates } from './updater'
 
 // OAuth 콜백이 외부 브라우저에서 앱으로 돌아오는 경로 (renderer의 redirectTo와 같아야 한다).
 const PROTOCOL = 'syncpad'
@@ -118,6 +119,8 @@ if (!app.requestSingleInstanceLock()) {
 
     createWindow()
     createTray(showMainWindow)
+    // dev 실행은 app-update.yml이 없어 확인할 대상이 없다.
+    if (!is.dev) checkForUpdates()
 
     // On macOS it's common to re-create a window in the app when the
     // dock icon is clicked and there are no other windows open.
