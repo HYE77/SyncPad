@@ -1,7 +1,7 @@
 name: Release
 
 # v* 태그를 푸시하면 mac/win 설치 파일을 빌드해 GitHub Release에 올린다.
-# 코드 서명·공증·자동 업데이트는 범위 밖이다 (#51).
+# 코드 서명·공증은 범위 밖이다 (#51). latest*.yml·blockmap은 자동 업데이트가 읽는다 (#89).
 on:
   push:
     tags: ['v*']
@@ -18,10 +18,10 @@ jobs:
         include:
           - os: macos-latest
             script: build:mac
-            asset: dist/*.dmg
+            asset: dist/*.dmg dist/*.zip dist/*.blockmap dist/latest-mac.yml
           - os: windows-latest
             script: build:win
-            asset: dist/*-setup.exe
+            asset: dist/*-setup.exe dist/*-setup.exe.blockmap dist/latest.yml
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v5
