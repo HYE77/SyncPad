@@ -4,8 +4,9 @@ import { Button } from '../../components/Button'
 import { TextInput } from '../../components/TextInput'
 import { GoogleLogo } from '../../components/GoogleLogo'
 
-// main/index.ts의 CALLBACK_PREFIX, Supabase 콘솔의 Redirect URLs와 같아야 한다.
-const REDIRECT_TO = 'syncpad://auth/callback'
+// 브라우저가 syncpad://로 바로 가면 탭이 로딩 상태로 멈춘다. GitHub Pages 안내 페이지(docs/auth/callback)가
+// 쿼리를 그대로 붙여 main/index.ts의 CALLBACK_PREFIX로 넘긴다. Supabase 콘솔의 Redirect URLs에 있어야 한다.
+const REDIRECT_TO = 'https://hye77.github.io/SyncPad/auth/callback/'
 
 export function Login(): React.JSX.Element {
   const [email, setEmail] = useState('')
