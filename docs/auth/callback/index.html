@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>SyncPad 로그인</title>
+    <style>
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #0d0d0d;
+        color: #d4d4d4;
+        font-family: ui-monospace, Menlo, Consolas, monospace;
+        text-align: center;
+      }
+      p {
+        margin: 0.4em 0;
+      }
+      .dim {
+        color: #7a7a7a;
+        font-size: 0.85em;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <p>&gt;_ 로그인이 완료되었습니다. 이 창은 닫으셔도 됩니다.</p>
+      <p class="dim">앱으로 돌아가지 않으면 SyncPad가 실행 중인지 확인하세요.</p>
+    </main>
+    <script>
+      // Supabase OAuth 결과(?code=...)를 앱의 커스텀 스킴으로 넘긴다. (#90)
+      // 브라우저가 syncpad://로 바로 리다이렉트되면 탭이 로딩 상태로 멈추기 때문에 이 페이지를 거친다.
+      window.location.replace('syncpad://auth/callback' + window.location.search)
+      // 스크립트가 연 탭이 아니면 대부분 무시된다. 그래서 위 안내 문구가 실제 마무리다.
+      setTimeout(() => window.close(), 300)
+    </script>
+  </body>
+</html>
