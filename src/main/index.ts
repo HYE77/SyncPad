@@ -69,6 +69,9 @@ function showMainWindow(): void {
 function handleAuthUrl(url: string): void {
   if (!url.startsWith(CALLBACK_PREFIX)) return
   pendingAuthUrl = url
+  // macOS는 링크로 콜드 스타트하면 open-url이 ready보다 먼저 온다. 창은 whenReady가 만들고
+  // did-finish-load가 flushAuthUrl로 보낸다.
+  if (!app.isReady()) return
   showMainWindow()
   flushAuthUrl()
 }
@@ -84,6 +87,10 @@ function flushAuthUrl(): void {
 if (!app.requestSingleInstanceLock()) {
   app.quit()
 } else {
+  // Windows/Linux는 링크로 콜드 스타트하면 URL이 이 인스턴스의 argv로 온다. ready 전이라 담아 두기만 한다.
+  const launchUrl = process.argv.find((arg) => arg.startsWith(`${PROTOCOL}://`))
+  if (launchUrl) handleAuthUrl(launchUrl)
+
   app.on('second-instance', (_event, argv) => {
     const url = argv.find((arg) => arg.startsWith(`${PROTOCOL}://`))
     if (url) handleAuthUrl(url)
