@@ -22,11 +22,15 @@ function QuickList(): React.JSX.Element {
   const [content, setContent] = useState('')
   const [isTask, setIsTask] = useState(false)
 
+  // Enter는 저장하고 닫는다. 빈 칸이면 그냥 닫는다. 한글 조합 중 Enter는 폼 제출이 안 되므로
+  // main의 before-input-event 대신 여기서 처리한다.
   async function submit(): Promise<void> {
     const text = content.trim()
-    if (!text) return
-    setContent('')
-    if (!(await create(text, isTask))) setContent(text)
+    if (text) {
+      setContent('')
+      if (!(await create(text, isTask))) return setContent(text)
+    }
+    window.electron.ipcRenderer.send('popup:hide')
   }
 
   return (
@@ -92,7 +96,7 @@ function QuickList(): React.JSX.Element {
       </ul>
 
       <p className="border-term-line text-term-faint shrink-0 border-t px-3.5 py-2 text-right text-[11px]">
-        Esc로 닫는다
+        Enter/Esc로 닫기
       </p>
       {error && <p className="bg-red-950 px-3 py-1 text-xs text-red-300">{error}</p>}
     </div>

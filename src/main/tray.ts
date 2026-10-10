@@ -1,4 +1,4 @@
-import { BrowserWindow, Menu, Tray, nativeImage, screen } from 'electron'
+import { BrowserWindow, Menu, ipcMain, Tray, nativeImage, screen } from 'electron'
 import { join } from 'path'
 import { is } from '@electron-toolkit/utils'
 import iconPath from '../../resources/trayIconTemplate.png?asset'
@@ -33,10 +33,11 @@ function createPopup(): BrowserWindow {
     popup.loadFile(join(__dirname, '../renderer/index.html'), { hash: 'quick' })
   }
 
-  // 팝업에는 닫기 버튼이 없다. Esc로 닫는다.
+  // 팝업에는 닫기 버튼이 없다. Esc로 닫고, Enter는 renderer가 저장 후 popup:hide로 닫는다.
   popup.webContents.on('before-input-event', (_event, input) => {
     if (input.key === 'Escape') popup.hide()
   })
+  ipcMain.on('popup:hide', () => popup.hide())
 
   return popup
 }
