@@ -133,11 +133,18 @@ export function ItemRow({
           <input
             list="syncpad-categories"
             defaultValue={item.category ?? ''}
+            // 목록에서 고르면(클릭, 방향키+Enter) 타이핑이 아닌 값 교체로 들어온다. 바로 확정한다.
+            onInput={(e) => {
+              const event = e.nativeEvent
+              if (!(event instanceof InputEvent) || event.inputType === 'insertReplacementText')
+                e.currentTarget.blur()
+            }}
             onKeyDown={(e) => e.key === 'Enter' && e.currentTarget.blur()}
             onBlur={(e) => onChangeCategory(e.target.value.trim() || null)}
             placeholder="카테고리"
             aria-label="항목 카테고리"
-            className="w-24 shrink-0 bg-transparent py-0.5 text-xs text-term-dim outline-none select-text placeholder:text-term-dim/50"
+            // 폭을 내용(빈 값이면 placeholder)에 맞춰 ▾가 글자 바로 뒤에 붙게 한다.
+            className="max-w-40 min-w-16 shrink-0 bg-transparent [field-sizing:content] py-0.5 text-xs text-term-dim outline-none select-text placeholder:text-term-dim/50"
           />
         ) : (
           item.category && (
