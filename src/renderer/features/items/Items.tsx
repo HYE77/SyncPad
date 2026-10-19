@@ -116,6 +116,7 @@ export function Items({ onOpenSettings }: { onOpenSettings: () => void }): React
             <ItemRow
               key={item.id}
               item={item}
+              categories={categories}
               editing={editingId === item.id}
               // 순서는 sort_order로 저장되므로 '내 순서'일 때만 끌 수 있다.
               draggable={sort === 'manual' && !query.trim()}
